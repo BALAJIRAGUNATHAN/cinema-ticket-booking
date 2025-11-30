@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+supabase
+stripe
+python-dotenv
+pydantic
+redis>=5.0.0
