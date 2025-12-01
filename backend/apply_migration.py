@@ -7,24 +7,18 @@ import os
 from dotenv import load_dotenv
 from supabase import create_client, Client
 import psycopg2
+import sys
 
 load_dotenv()
 
-# Get Supabase connection details
-supabase_url = os.environ.get("SUPABASE_URL")
-supabase_key = os.environ.get("SUPABASE_SERVICE_KEY")
+# Get Supabase credentials
+SUPABASE_URL = os.getenv("SUPABASE_URL") or os.getenv("NEXT_PUBLIC_SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_KEY") or os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
 
-if not supabase_url or not supabase_key:
-    print("Error: SUPABASE_URL or SUPABASE_SERVICE_KEY not found.")
-    print("\nPlease apply the migration manually:")
-    print("1. Go to your Supabase Dashboard")
-    print("2. Navigate to SQL Editor")
-    print("3. Run the following SQL:\n")
-    
-    with open('../supabase/migrations/003_add_languages_and_format.sql', 'r') as f:
-        print(f.read())
-    
-    exit(1)
+if not SUPABASE_URL or not SUPABASE_KEY:
+    print("Error: Supabase credentials not found.")
+    print("Please ensure .env.local exists and contains NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY")
+    sys.exit(1)
 
 print("=" * 60)
 print("MANUAL MIGRATION REQUIRED")

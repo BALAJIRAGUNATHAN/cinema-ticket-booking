@@ -28,10 +28,11 @@ interface Showtime {
     language: string;
     format: string;
     price: number;
-    theater?: {
-        id: string;
+    screen?: {
         name: string;
-        location: string;
+        theater?: {
+            name: string;
+        };
     };
 }
 
@@ -46,12 +47,19 @@ export default function MovieDetailsClient({ movie, showtimes }: MovieDetailsCli
     const [selectedFormat, setSelectedFormat] = useState('');
     const [filteredShowtimes, setFilteredShowtimes] = useState<Showtime[]>([]);
 
-    // Use movie languages if available, otherwise fallback to showtime languages or defaults
-    const availableLanguages = movie.languages && movie.languages.length > 0
-        ? movie.languages
-        : Array.from(new Set(showtimes.map(s => s.language)));
+    // Prioritize showtime data - only show languages and formats that have actual showtimes
+    // If no showtimes exist, fall back to movie languages as defaults
+    const availableLanguages = showtimes.length > 0
+        ? Array.from(new Set(showtimes.map(s => s.language)))
+        : Array.from(new Set(movie.languages && movie.languages.length > 0 ? movie.languages : ['English', 'Hindi', 'Tamil']));
 
-    const formats = Array.from(new Set(showtimes.map(s => s.format)));
+    console.log('Showtimes:', showtimes);
+    console.log('Movie Languages:', movie.languages);
+    console.log('Available Languages:', availableLanguages);
+
+    const formats = showtimes.length > 0
+        ? Array.from(new Set(showtimes.map(s => s.format)))
+        : ['2D', 'IMAX', '3D'];
 
     const handleApply = (language: string, format: string) => {
         setSelectedLanguage(language);
@@ -65,7 +73,7 @@ export default function MovieDetailsClient({ movie, showtimes }: MovieDetailsCli
 
     // Group showtimes by theater
     const showtimesByTheater = filteredShowtimes.reduce((acc, showtime) => {
-        const theaterName = showtime.theater?.name || 'Unknown Theater';
+        const theaterName = showtime.screen?.theater?.name || 'Unknown Theater';
         if (!acc[theaterName]) {
             acc[theaterName] = [];
         }

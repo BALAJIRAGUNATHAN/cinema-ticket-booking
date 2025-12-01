@@ -5,3 +5,5 @@ stripe
 python-dotenv
 pydantic
 redis>=5.0.0
+psycopg2-binary
+email-validator

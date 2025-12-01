@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
 import { Loader2 } from 'lucide-react';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export default function NewShowtimePage() {
     const router = useRouter();
@@ -17,16 +18,36 @@ export default function NewShowtimePage() {
         date: '',
         time: '',
         price: '',
+        language: 'English',
         format: '2D',
     });
 
     useEffect(() => {
         async function fetchData() {
-            const { data: moviesData } = await supabase.from('movies').select('id, title');
-            const { data: screensData } = await supabase.from('screens').select('id, name, theater:theaters(name)');
+            console.log('Fetching data from:', API_URL);
+            try {
+                // Fetch movies from backend (note trailing slash)
+                console.log('Fetching movies...');
+                const moviesRes = await fetch(`${API_URL}/movies/`);
+                console.log('Movies response status:', moviesRes.status);
+                if (moviesRes.ok) {
+                    const moviesData = await moviesRes.json();
+                    console.log('Movies data:', moviesData);
+                    setMovies(moviesData);
+                }
 
-            if (moviesData) setMovies(moviesData);
-            if (screensData) setScreens(screensData);
+                // Fetch screens from backend (note trailing slash)
+                console.log('Fetching screens...');
+                const screensRes = await fetch(`${API_URL}/screens/`);
+                console.log('Screens response status:', screensRes.status);
+                if (screensRes.ok) {
+                    const screensData = await screensRes.json();
+                    console.log('Screens data:', screensData);
+                    setScreens(screensData);
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
         }
         fetchData();
     }, []);
@@ -49,6 +70,7 @@ export default function NewShowtimePage() {
                     screen_id: formData.screen_id,
                     start_time,
                     price: Math.round(parseFloat(formData.price) * 100),
+                    language: formData.language,
                     format: formData.format,
                 }),
             });
@@ -141,20 +163,39 @@ export default function NewShowtimePage() {
                     />
                 </div>
 
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Format</label>
-                    <select
-                        required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                        value={formData.format}
-                        onChange={(e) => setFormData({ ...formData, format: e.target.value })}
-                    >
-                        <option value="2D">2D</option>
-                        <option value="3D">3D</option>
-                        <option value="IMAX">IMAX</option>
-                        <option value="4DX">4DX</option>
-                        <option value="IMAX 3D">IMAX 3D</option>
-                    </select>
+                <div className="grid grid-cols-2 gap-6">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
+                        <select
+                            required
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                            value={formData.language}
+                            onChange={(e) => setFormData({ ...formData, language: e.target.value })}
+                        >
+                            <option value="English">English</option>
+                            <option value="Hindi">Hindi</option>
+                            <option value="Tamil">Tamil</option>
+                            <option value="Telugu">Telugu</option>
+                            <option value="Malayalam">Malayalam</option>
+                            <option value="Kannada">Kannada</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Format</label>
+                        <select
+                            required
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                            value={formData.format}
+                            onChange={(e) => setFormData({ ...formData, format: e.target.value })}
+                        >
+                            <option value="2D">2D</option>
+                            <option value="3D">3D</option>
+                            <option value="IMAX">IMAX</option>
+                            <option value="4DX">4DX</option>
+                            <option value="IMAX 3D">IMAX 3D</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div className="pt-4">

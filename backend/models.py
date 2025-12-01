@@ -25,6 +25,7 @@ class ShowtimeBase(BaseModel):
     screen_id: str
     start_time: str
     price: int  # in cents
+    language: str = "English"  # Language of the screening
     format: str = "2D"  # Screening format: 2D, 3D, IMAX, 4DX, etc.
 class ShowtimeCreate(ShowtimeBase):
     pass
