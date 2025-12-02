@@ -81,30 +81,30 @@ export default function NewMoviePage() {
 
     return (
         <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold text-gray-900 mb-8">Add New Movie</h1>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent mb-8">Add New Movie</h1>
 
-            <form onSubmit={handleSubmit} className="space-y-8 bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+            <form onSubmit={handleSubmit} className="space-y-8 bg-white/5 backdrop-blur-xl p-8 rounded-2xl shadow-2xl border border-white/10">
                 {/* Basic Info */}
                 <div className="space-y-6">
-                    <h2 className="text-xl font-semibold text-gray-800 border-b pb-2">Basic Information</h2>
+                    <h2 className="text-xl font-semibold text-white border-b border-white/10 pb-2">Basic Information</h2>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Movie Title</label>
+                        <label className="block text-sm font-medium text-purple-200 mb-1">Movie Title</label>
                         <input
                             type="text"
                             required
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                            className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all text-white placeholder-purple-300/50"
                             value={formData.title}
                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <label className="block text-sm font-medium text-purple-200 mb-1">Description</label>
                         <textarea
                             required
                             rows={4}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                            className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all text-white placeholder-purple-300/50"
                             value={formData.description}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                         />
@@ -112,23 +112,23 @@ export default function NewMoviePage() {
 
                     <div className="grid grid-cols-2 gap-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Genre</label>
+                            <label className="block text-sm font-medium text-purple-200 mb-1">Genre</label>
                             <input
                                 type="text"
                                 required
                                 placeholder="e.g. Action, Drama"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all text-white placeholder-purple-300/50"
                                 value={formData.genre}
                                 onChange={(e) => setFormData({ ...formData, genre: e.target.value })}
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Duration (minutes)</label>
+                            <label className="block text-sm font-medium text-purple-200 mb-1">Duration (minutes)</label>
                             <input
                                 type="number"
                                 required
                                 min="1"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all text-white placeholder-purple-300/50"
                                 value={formData.duration}
                                 onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
                             />
@@ -137,22 +137,22 @@ export default function NewMoviePage() {
 
                     <div className="grid grid-cols-2 gap-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Release Date</label>
+                            <label className="block text-sm font-medium text-purple-200 mb-1">Release Date</label>
                             <input
                                 type="date"
                                 required
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all text-white"
                                 value={formData.release_date}
                                 onChange={(e) => setFormData({ ...formData, release_date: e.target.value })}
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Poster URL</label>
+                            <label className="block text-sm font-medium text-purple-200 mb-1">Poster URL</label>
                             <input
                                 type="url"
                                 required
                                 placeholder="https://..."
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all text-white placeholder-purple-300/50"
                                 value={formData.poster_url}
                                 onChange={(e) => setFormData({ ...formData, poster_url: e.target.value })}
                             />
@@ -160,10 +160,10 @@ export default function NewMoviePage() {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Trailer URL (YouTube)</label>
+                        <label className="block text-sm font-medium text-purple-200 mb-1">Trailer URL (YouTube)</label>
                         <input
                             type="url"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                            className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all text-white placeholder-purple-300/50"
                             value={formData.trailer_url}
                             onChange={(e) => setFormData({ ...formData, trailer_url: e.target.value })}
                             placeholder="https://youtube.com/watch?v=..."
@@ -172,7 +172,7 @@ export default function NewMoviePage() {
 
                     {/* Languages */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Languages</label>
+                        <label className="block text-sm font-medium text-purple-200 mb-2">Languages</label>
                         <div className="flex flex-wrap gap-3">
                             {['English', 'Hindi', 'Tamil', 'Telugu', 'Malayalam', 'Kannada'].map((lang) => (
                                 <label key={lang} className="flex items-center gap-2 cursor-pointer">
@@ -186,20 +186,20 @@ export default function NewMoviePage() {
                                                 setSelectedLanguages(selectedLanguages.filter(l => l !== lang));
                                             }
                                         }}
-                                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                        className="w-4 h-4 text-purple-600 border-white/20 rounded focus:ring-purple-500 bg-white/10"
                                     />
-                                    <span className="text-sm text-gray-700">{lang}</span>
+                                    <span className="text-sm text-purple-200">{lang}</span>
                                 </label>
                             ))}
                         </div>
-                        <p className="text-xs text-gray-500 mt-1">Select all languages available for this movie</p>
+                        <p className="text-xs text-purple-300/60 mt-1">Select all languages available for this movie</p>
                     </div>
                 </div>
 
                 {/* Cast Section */}
                 <div className="space-y-4">
-                    <div className="flex items-center justify-between border-b pb-2">
-                        <h2 className="text-xl font-semibold text-gray-800">Cast Members (Max 4)</h2>
+                    <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                        <h2 className="text-xl font-semibold text-white">Cast Members (Max 4)</h2>
                         <button
                             type="button"
                             onClick={addCastMember}
@@ -212,13 +212,13 @@ export default function NewMoviePage() {
                     </div>
 
                     {cast.length === 0 && (
-                        <p className="text-gray-500 text-sm italic">No cast members added yet. Click "Add Cast" to add up to 4 cast members.</p>
+                        <p className="text-purple-300/60 text-sm italic">No cast members added yet. Click "Add Cast" to add up to 4 cast members.</p>
                     )}
 
                     {cast.map((member, index) => (
-                        <div key={index} className="p-4 bg-gray-50 rounded-lg border border-gray-200 space-y-3">
+                        <div key={index} className="p-4 bg-white/5 rounded-lg border border-white/10 space-y-3">
                             <div className="flex items-center justify-between mb-2">
-                                <h3 className="font-medium text-gray-700">Cast Member {index + 1}</h3>
+                                <h3 className="font-medium text-purple-200">Cast Member {index + 1}</h3>
                                 <button
                                     type="button"
                                     onClick={() => removeCastMember(index)}
@@ -231,21 +231,21 @@ export default function NewMoviePage() {
                                 <input
                                     type="text"
                                     placeholder="Actor Name"
-                                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                                    className="px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none text-sm text-white placeholder-purple-300/50"
                                     value={member.name}
                                     onChange={(e) => updateCastMember(index, 'name', e.target.value)}
                                 />
                                 <input
                                     type="text"
                                     placeholder="Character/Role"
-                                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                                    className="px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none text-sm text-white placeholder-purple-300/50"
                                     value={member.role}
                                     onChange={(e) => updateCastMember(index, 'role', e.target.value)}
                                 />
                                 <input
                                     type="url"
                                     placeholder="Image URL"
-                                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                                    className="px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none text-sm text-white placeholder-purple-300/50"
                                     value={member.image}
                                     onChange={(e) => updateCastMember(index, 'image', e.target.value)}
                                 />
@@ -258,7 +258,7 @@ export default function NewMoviePage() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                        className="w-full flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 focus:ring-4 focus:ring-purple-500/50 transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-blue-500/30"
                     >
                         {loading ? (
                             <>
