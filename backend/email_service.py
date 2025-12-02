@@ -116,9 +116,14 @@ def send_booking_confirmation(
         
         print(f"📤 Sending email via Resend API...")
         
+        # TEMP FIX: Resend free tier only allows sending to the account email
+        # TODO: Verify a domain at resend.com to send to any email
+        actual_recipient = "balajiragunathan5911@gmail.com"
+        print(f"⚠️ Using override recipient: {actual_recipient} (Resend free tier limitation)")
+        
         params = {
-            "from": "Cinema Booking <onboarding@resend.dev>",
-            "to": [customer_email],
+            "from": "CineSpot <onboarding@resend.dev>",
+            "to": [actual_recipient],
             "subject": f"🎬 Booking Confirmed: {movie_title}",
             "html": html,
         }
