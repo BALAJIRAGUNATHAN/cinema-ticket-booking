@@ -11,10 +11,21 @@ interface CastMember {
     image: string;
 }
 
+interface MovieFormData {
+    title: string;
+    description: string;
+    genre: string;
+    duration: string;
+    release_date: string;
+    poster_url: string;
+    trailer_url: string;
+    rating: string;
+}
+
 export default function NewMoviePage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<MovieFormData>({
         title: '',
         description: '',
         genre: '',

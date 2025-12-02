@@ -5,10 +5,24 @@ import { Tag, Calendar, TrendingUp, Trash2 } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
+interface OfferFormData {
+    title: string;
+    description: string;
+    image_url: string;
+    coupon_code: string;
+    discount_type: string;
+    discount_value: number;
+    min_booking_amount: number;
+    max_discount_amount: number | null;
+    valid_from: string;
+    valid_until: string;
+    terms_conditions: string;
+}
+
 export default function OffersPage() {
     const [offers, setOffers] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<OfferFormData>({
         title: '',
         description: '',
         image_url: '',
