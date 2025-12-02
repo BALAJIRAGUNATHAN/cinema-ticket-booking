@@ -20,11 +20,12 @@ app.add_middleware(
 def read_root():
     return {"message": "Welcome to Movie Booking System API"}
 
-from routers import movies, showtimes, bookings, seats, upcoming_movies, screens
+from routers import movies, showtimes, bookings, seats, upcoming_movies, screens, ads
 
 app.include_router(movies.router)
 app.include_router(showtimes.router)
 app.include_router(bookings.router)
+app.include_router(ads.router)
 app.include_router(seats.router)
 app.include_router(upcoming_movies.router)
 app.include_router(screens.router)
