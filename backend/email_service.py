@@ -1,13 +1,10 @@
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import resend
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-GMAIL_USER = os.environ.get("GMAIL_USER")
-GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD")
+resend.api_key = os.environ.get("RESEND_API_KEY", "").strip()
 
 def send_booking_confirmation(
     customer_email: str,
@@ -20,92 +17,119 @@ def send_booking_confirmation(
     total_amount: int,
     booking_id: str
 ):
-    """Send booking confirmation email to customer"""
+    """Send booking confirmation email to customer using Resend"""
     
-    if not GMAIL_USER or not GMAIL_APP_PASSWORD:
-        print("Email credentials not configured")
+    print(f"📧 Starting Resend email send process for {customer_email}")
+    print(f"Resend API Key configured: {bool(resend.api_key)}")
+    
+    if not resend.api_key:
+        print("❌ Resend API key not configured")
         return False
     
     try:
-        # Create message
-        msg = MIMEMultipart('alternative')
-        msg['Subject'] = f'🎬 Booking Confirmed - {movie_title}'
-        msg['From'] = GMAIL_USER
-        msg['To'] = customer_email
-        
-        # HTML email template
+        # Premium HTML email template
         html = f"""
+        <!DOCTYPE html>
         <html>
-          <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
-            <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-              <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
-                <h1 style="color: white; margin: 0; font-size: 28px;">🎉 Booking Confirmed!</h1>
-              </div>
-              
-              <div style="padding: 30px;">
-                <p style="font-size: 18px; color: #333;">Hi {customer_name},</p>
-                <p style="color: #666;">Your movie tickets have been booked successfully!</p>
-                
-                <div style="background-color: #f8f9fa; border-left: 4px solid #667eea; padding: 20px; margin: 20px 0; border-radius: 5px;">
-                  <h2 style="margin-top: 0; color: #667eea; font-size: 22px;">{movie_title}</h2>
-                  
-                  <table style="width: 100%; margin-top: 15px;">
-                    <tr>
-                      <td style="padding: 8px 0; color: #666; font-weight: bold;">Theater:</td>
-                      <td style="padding: 8px 0; color: #333;">{theater_name}</td>
-                    </tr>
-                    <tr>
-                      <td style="padding: 8px 0; color: #666; font-weight: bold;">Screen:</td>
-                      <td style="padding: 8px 0; color: #333;">{screen_name}</td>
-                    </tr>
-                    <tr>
-                      <td style="padding: 8px 0; color: #666; font-weight: bold;">Date & Time:</td>
-                      <td style="padding: 8px 0; color: #333;">{showtime}</td>
-                    </tr>
-                    <tr>
-                      <td style="padding: 8px 0; color: #666; font-weight: bold;">Seats:</td>
-                      <td style="padding: 8px 0; color: #333; font-weight: bold;">{', '.join(seats)}</td>
-                    </tr>
-                    <tr>
-                      <td style="padding: 8px 0; color: #666; font-weight: bold;">Total Amount:</td>
-                      <td style="padding: 8px 0; color: #28a745; font-size: 20px; font-weight: bold;">₹{(total_amount / 100):.2f}</td>
-                    </tr>
-                    <tr>
-                      <td style="padding: 8px 0; color: #666; font-weight: bold;">Booking ID:</td>
-                      <td style="padding: 8px 0; color: #333; font-family: monospace;">{booking_id}</td>
-                    </tr>
-                  </table>
-                </div>
-                
-                <div style="background-color: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                  <p style="margin: 0; color: #856404;"><strong>📱 Show this email at the theater entrance</strong></p>
-                </div>
-                
-                <p style="color: #666; margin-top: 20px;">Enjoy your movie! 🍿</p>
-              </div>
-              
-              <div style="background-color: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #dee2e6;">
-                <p style="color: #999; font-size: 12px; margin: 0;">This is an automated email. Please do not reply.</p>
-              </div>
-            </div>
-          </body>
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Booking Confirmed</title>
+        </head>
+        <body style="margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #0f172a; color: #e2e8f0;">
+            <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td align="center" style="padding: 40px 0;">
+                        <table role="presentation" style="width: 600px; border-collapse: separate; border-spacing: 0; background-color: #1e293b; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); border: 1px solid #334155;">
+                            
+                            <tr>
+                                <td style="padding: 40px 40px 30px 40px; text-align: center; background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);">
+                                    <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">Booking Confirmed!</h1>
+                                    <p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.9); font-size: 16px;">Get ready for the show! 🍿</p>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding: 40px;">
+                                    <div style="text-align: center; margin-bottom: 30px;">
+                                        <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700;">{movie_title}</h2>
+                                        <div style="height: 4px; width: 60px; background: linear-gradient(90deg, #3b82f6, #8b5cf6); margin: 15px auto; border-radius: 2px;"></div>
+                                    </div>
+
+                                    <table role="presentation" style="width: 100%; background-color: #0f172a; border-radius: 12px; border: 1px solid #334155; margin-bottom: 30px;">
+                                        <tr>
+                                            <td style="padding: 24px;">
+                                                <table role="presentation" style="width: 100%;">
+                                                    <tr>
+                                                        <td style="padding-bottom: 16px; border-bottom: 1px solid #334155;">
+                                                            <p style="margin: 0; color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Theater</p>
+                                                            <p style="margin: 4px 0 0 0; color: #ffffff; font-size: 16px; font-weight: 500;">{theater_name}</p>
+                                                            <p style="margin: 2px 0 0 0; color: #64748b; font-size: 14px;">{screen_name}</p>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="padding: 16px 0; border-bottom: 1px solid #334155;">
+                                                            <p style="margin: 0; color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Date & Time</p>
+                                                            <p style="margin: 4px 0 0 0; color: #ffffff; font-size: 16px; font-weight: 500;">{showtime}</p>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="padding: 16px 0; border-bottom: 1px solid #334155;">
+                                                            <p style="margin: 0; color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Seats</p>
+                                                            <p style="margin: 4px 0 0 0; color: #eab308; font-size: 16px; font-weight: 700;">{', '.join(seats)}</p>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="padding-top: 16px;">
+                                                            <table role="presentation" style="width: 100%;">
+                                                                <tr>
+                                                                    <td style="text-align: left;">
+                                                                        <p style="margin: 0; color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Booking ID</p>
+                                                                        <p style="margin: 4px 0 0 0; color: #ffffff; font-family: monospace; font-size: 14px;">{booking_id.split('-')[0].upper()}</p>
+                                                                    </td>
+                                                                    <td style="text-align: right;">
+                                                                        <p style="margin: 0; color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Total Paid</p>
+                                                                        <p style="margin: 4px 0 0 0; color: #22c55e; font-size: 20px; font-weight: 700;">₹{(total_amount / 100):.2f}</p>
+                                                                    </td>
+                                                                </tr>
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <div style="text-align: center; border-top: 1px solid #334155; padding-top: 30px;">
+                                        <p style="margin: 0 0 8px 0; color: #e2e8f0; font-size: 14px;">Need help? Contact support</p>
+                                        <p style="margin: 0; color: #64748b; font-size: 12px;">© 2024 Cinema Booking System</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </body>
         </html>
         """
         
-        part = MIMEText(html, 'html')
-        msg.attach(part)
+        print(f"📤 Sending email via Resend API...")
         
-        # Send email
-        print(f"📤 Connecting to Gmail SMTP server...")
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
-            print(f"🔐 Authenticating with Gmail...")
-            server.login(GMAIL_USER, GMAIL_APP_PASSWORD)
-            print(f"📨 Sending message...")
-            server.send_message(msg)
+        params = {
+            "from": "Cinema Booking <onboarding@resend.dev>",
+            "to": [customer_email],
+            "subject": f"🎬 Booking Confirmed: {movie_title}",
+            "html": html,
+        }
         
-        print(f"✅ Email sent successfully to {customer_email}")
+        response = resend.Emails.send(params)
+        
+        print(f"✅ Email sent successfully via Resend! ID: {response.get('id', 'N/A')}")
         return True
         
     except Exception as e:
-        print(f"Failed to send email: {e}")
+        print(f"❌ Failed to send email via Resend: {e}")
+        import traceback
+        traceback.print_exc()
         return False
