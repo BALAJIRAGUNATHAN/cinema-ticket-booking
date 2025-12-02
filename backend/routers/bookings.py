@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
+stripe.api_key = os.environ.get("STRIPE_SECRET_KEY", "").strip()
 
 router = APIRouter(
     prefix="/bookings",
@@ -18,7 +18,7 @@ router = APIRouter(
 async def create_payment_intent(booking: BookingCreate):
     try:
         if not stripe.api_key:
-            print("❌ Error: Stripe API key is missing")
+            print("❌ Error: Stripe API key is missing or empty")
             raise Exception("Stripe configuration error: API key missing")
 
         # Verify seats are locked (optional user_session check)
