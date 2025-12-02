@@ -84,8 +84,8 @@ export default function MovieBookingPage({ params }: { params: Promise<{ id: str
 
                 // Set default format
                 if (movieShowtimes.length > 0) {
-                    const formats = Array.from(new Set(movieShowtimes.map((s: Showtime) => s.format)));
-                    setSelectedFormat(formats[0] || '2D');
+                    const formats = Array.from(new Set(movieShowtimes.map((s: Showtime) => s.format))) as string[];
+                    setSelectedFormat(formats.length > 0 ? formats[0] : '2D');
                 }
             } catch (error) {
                 console.error('Error fetching data:', error);
