@@ -17,11 +17,16 @@ router = APIRouter(
 @router.post("/create-payment-intent")
 async def create_payment_intent(booking: BookingCreate):
     try:
+        if not stripe.api_key:
+            print("❌ Error: Stripe API key is missing")
+            raise Exception("Stripe configuration error: API key missing")
+
         # Verify seats are locked (optional user_session check)
         # This is a safety check - frontend should have already locked seats
         import redis_client
         
         # Check if seats are available (not booked in Supabase)
+        print(f"Checking availability for seats: {booking.seats} in showtime {booking.showtime_id}")
         response = supabase.table("bookings").select("seats").eq("showtime_id", booking.showtime_id).eq("payment_status", "paid").execute()
         
         booked_seats = []
@@ -32,9 +37,11 @@ async def create_payment_intent(booking: BookingCreate):
         # Check if any requested seats are already booked
         conflicting_seats = set(booking.seats) & set(booked_seats)
         if conflicting_seats:
+            print(f"❌ Conflict: Seats {conflicting_seats} are already booked")
             raise HTTPException(status_code=409, detail=f"Seats {', '.join(conflicting_seats)} are already booked")
         
         # Create a PaymentIntent with the order amount and currency
+        print(f"Creating Stripe PaymentIntent for amount: {booking.total_amount}")
         intent = stripe.PaymentIntent.create(
             amount=booking.total_amount,
             currency='usd',
@@ -48,11 +55,15 @@ async def create_payment_intent(booking: BookingCreate):
                 'seats': ",".join(booking.seats)
             }
         )
+        print(f"✅ PaymentIntent created: {intent.id}")
         return {
             'clientSecret': intent.client_secret,
             'id': intent.id
         }
     except Exception as e:
+        print(f"❌ Error in create_payment_intent: {str(e)}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.post("/confirm")
