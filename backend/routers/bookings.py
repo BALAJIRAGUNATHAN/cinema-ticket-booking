@@ -66,22 +66,24 @@ async def create_payment_intent(booking: BookingCreate):
         traceback.print_exc()
         raise HTTPException(status_code=400, detail=str(e))
 
+from fastapi import BackgroundTasks
+
 @router.post("/confirm")
-async def confirm_booking(booking_details: BookingCreate):
+async def confirm_booking(booking_details: BookingCreate, background_tasks: BackgroundTasks):
     try:
+        print(f"Confirming booking for {booking_details.customer_email}")
+        
         # Create booking in Supabase
         booking_data = booking_details.dict()
         booking_data['payment_status'] = 'paid'
         
         response = supabase.table("bookings").insert(booking_data).execute()
         if not response.data:
+            print("❌ Failed to save booking to database")
             raise HTTPException(status_code=500, detail="Failed to save booking to database")
         
         booking = response.data[0]
-        
-        # Release Redis seat locks (seats are now permanently booked)
-        # Note: user_session not available here, but locks will expire anyway
-        # This is just a cleanup optimization
+        print(f"✅ Booking saved to DB: {booking['id']}")
         
         # Fetch showtime details for email
         showtime_response = supabase.table("showtimes").select(
@@ -91,33 +93,31 @@ async def confirm_booking(booking_details: BookingCreate):
         if showtime_response.data:
             showtime = showtime_response.data
             
-            # Send email confirmation
-            try:
-                from email_service import send_booking_confirmation
-                from datetime import datetime
-                
-                email_sent = send_booking_confirmation(
-                    customer_email=booking_details.customer_email,
-                    customer_name=booking_details.customer_name,
-                    movie_title=showtime['movie']['title'],
-                    theater_name=showtime['screen']['theater']['name'],
-                    screen_name=showtime['screen']['name'],
-                    showtime=datetime.fromisoformat(showtime['start_time'].replace('Z', '+00:00')).strftime('%B %d, %Y at %I:%M %p'),
-                    seats=booking_details.seats,
-                    total_amount=booking_details.total_amount,
-                    booking_id=booking['id']
-                )
-                
-                if email_sent:
-                    print(f"✅ Email sent successfully to {booking_details.customer_email}")
-                else:
-                    print(f"⚠️ Email failed to send to {booking_details.customer_email}")
-            except Exception as email_error:
-                print(f"❌ Email error: {email_error}")
-                # Don't fail the booking if email fails
+            # Send email confirmation in background
+            from email_service import send_booking_confirmation
+            from datetime import datetime
+            
+            formatted_time = datetime.fromisoformat(showtime['start_time'].replace('Z', '+00:00')).strftime('%B %d, %Y at %I:%M %p')
+            
+            background_tasks.add_task(
+                send_booking_confirmation,
+                customer_email=booking_details.customer_email,
+                customer_name=booking_details.customer_name,
+                movie_title=showtime['movie']['title'],
+                theater_name=showtime['screen']['theater']['name'],
+                screen_name=showtime['screen']['name'],
+                showtime=formatted_time,
+                seats=booking_details.seats,
+                total_amount=booking_details.total_amount,
+                booking_id=booking['id']
+            )
+            print(f"📧 Email task added to background for {booking_details.customer_email}")
             
         return booking
 
     except Exception as e:
+        print(f"❌ Error in confirm_booking: {str(e)}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=400, detail=str(e))
 
