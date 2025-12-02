@@ -39,6 +39,22 @@ async def delete_showtime(showtime_id: str):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+@router.get("/{showtime_id}")
+async def get_showtime(showtime_id: str):
+    """Get a specific showtime by ID with full details"""
+    try:
+        response = supabase.table("showtimes") \
+            .select("*, movie:movies(*), screen:screens(name, theater:theaters(name))") \
+            .eq("id", showtime_id) \
+            .execute()
+            
+        if not response.data:
+            raise HTTPException(status_code=404, detail="Showtime not found")
+            
+        return response.data[0]
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 @router.post("/cleanup-expired")
 async def cleanup_expired_showtimes():
     """Delete all showtimes that have already passed"""
