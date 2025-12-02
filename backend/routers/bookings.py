@@ -105,25 +105,34 @@ async def confirm_booking(booking_details: BookingCreate, background_tasks: Back
             else:
                 print(f"✅ Email credentials configured for {gmail_user}")
             
-            # Send email confirmation in background
+            # Send email confirmation SYNCHRONOUSLY for debugging
+            # TODO: Switch back to background task after debugging
             from email_service import send_booking_confirmation
             from datetime import datetime
             
             formatted_time = datetime.fromisoformat(showtime['start_time'].replace('Z', '+00:00')).strftime('%B %d, %Y at %I:%M %p')
             
-            background_tasks.add_task(
-                send_booking_confirmation,
-                customer_email=booking_details.customer_email,
-                customer_name=booking_details.customer_name,
-                movie_title=showtime['movie']['title'],
-                theater_name=showtime['screen']['theater']['name'],
-                screen_name=showtime['screen']['name'],
-                showtime=formatted_time,
-                seats=booking_details.seats,
-                total_amount=booking_details.total_amount,
-                booking_id=booking['id']
-            )
-            print(f"📧 Email task added to background for {booking_details.customer_email}")
+            print(f"📧 Sending email SYNCHRONOUSLY to {booking_details.customer_email}...")
+            try:
+                email_result = send_booking_confirmation(
+                    customer_email=booking_details.customer_email,
+                    customer_name=booking_details.customer_name,
+                    movie_title=showtime['movie']['title'],
+                    theater_name=showtime['screen']['theater']['name'],
+                    screen_name=showtime['screen']['name'],
+                    showtime=formatted_time,
+                    seats=booking_details.seats,
+                    total_amount=booking_details.total_amount,
+                    booking_id=booking['id']
+                )
+                if email_result:
+                    print(f"✅ Email sent successfully!")
+                else:
+                    print(f"❌ Email failed to send (returned False)")
+            except Exception as email_error:
+                print(f"❌ Email exception: {str(email_error)}")
+                import traceback
+                traceback.print_exc()
             
         return booking
 
