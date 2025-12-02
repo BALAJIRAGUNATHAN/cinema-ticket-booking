@@ -12,6 +12,7 @@ interface Movie {
     genre: string;
     duration: number;
     release_date: string;
+    rating?: number;
 }
 
 interface Advertisement {
@@ -107,15 +108,6 @@ export default function HomeClient({ movies }: HomeClientProps) {
                         <Link href="/" className="text-sm font-medium text-gray-900 hover:text-red-600 border-b-2 border-red-600 pb-2 whitespace-nowrap">
                             Movies
                         </Link>
-                        <Link href="#" className="text-sm font-medium text-gray-600 hover:text-red-600 pb-2 whitespace-nowrap">
-                            Events
-                        </Link>
-                        <Link href="#" className="text-sm font-medium text-gray-600 hover:text-red-600 pb-2 whitespace-nowrap">
-                            Plays
-                        </Link>
-                        <Link href="#" className="text-sm font-medium text-gray-600 hover:text-red-600 pb-2 whitespace-nowrap">
-                            Sports
-                        </Link>
                     </div>
                 </div>
             </header>
@@ -210,8 +202,9 @@ export default function HomeClient({ movies }: HomeClientProps) {
                                                 </div>
                                             )}
                                             {/* Rating Badge */}
-                                            <div className="absolute top-2 left-2 px-2 py-1 bg-black/70 text-white text-xs font-bold rounded">
-                                                ★ 8.5/10
+                                            <div className="absolute top-2 left-2 px-2 py-1 bg-black/70 text-white text-xs font-bold rounded flex items-center gap-1">
+                                                <span>★</span>
+                                                <span>{movie.rating ? `${movie.rating}/10` : '8.5/10'}</span>
                                             </div>
                                         </div>
 

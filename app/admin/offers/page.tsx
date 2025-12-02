@@ -46,7 +46,7 @@ export default function OffersPage() {
                 coupon_code: formData.coupon_code.toUpperCase(),
                 discount_value: parseFloat(formData.discount_value.toString()),
                 min_booking_amount: parseFloat(formData.min_booking_amount.toString()),
-                max_discount_amount: formData.max_discount_amount ? parseFloat(formData.max_discount_amount.toString()) : null,
+                max_discount_amount: formData.max_discount_amount ? parseFloat(String(formData.max_discount_amount)) : null,
             };
 
             const res = await fetch(`${API_URL}/offers`, {
@@ -273,8 +273,8 @@ export default function OffersPage() {
                                         <div className="flex items-center gap-3 mb-2">
                                             <h3 className="text-xl font-bold text-white">{offer.title}</h3>
                                             <span className={`px-3 py-1 rounded-full text-xs font-bold ${expired ? 'bg-red-500/20 text-red-400' :
-                                                    offer.is_active ? 'bg-green-500/20 text-green-400' :
-                                                        'bg-gray-500/20 text-gray-400'
+                                                offer.is_active ? 'bg-green-500/20 text-green-400' :
+                                                    'bg-gray-500/20 text-gray-400'
                                                 }`}>
                                                 {expired ? 'EXPIRED' : offer.is_active ? 'ACTIVE' : 'INACTIVE'}
                                             </span>

@@ -10,6 +10,7 @@ class MovieBase(BaseModel):
     genre: Optional[str] = None
     duration: Optional[int] = None
     release_date: Optional[str] = None
+    rating: Optional[float] = None # Rating out of 10
     trailer_url: Optional[str] = None
     languages: List[str] = ["English"]  # Available languages for the movie
     cast: List[Dict[str, Any]] = [] # Max 4 cast members: [{"name": "...", "role": "...", "image": "..."}]
