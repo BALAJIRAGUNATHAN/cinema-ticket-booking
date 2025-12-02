@@ -93,6 +93,18 @@ async def confirm_booking(booking_details: BookingCreate, background_tasks: Back
         if showtime_response.data:
             showtime = showtime_response.data
             
+            # Check email credentials before adding background task
+            import os
+            gmail_user = os.environ.get("GMAIL_USER", "").strip()
+            gmail_password = os.environ.get("GMAIL_APP_PASSWORD", "").strip()
+            
+            if not gmail_user or not gmail_password:
+                print(f"⚠️ WARNING: Email credentials not configured. Email will not be sent.")
+                print(f"GMAIL_USER set: {bool(gmail_user)}")
+                print(f"GMAIL_APP_PASSWORD set: {bool(gmail_password)}")
+            else:
+                print(f"✅ Email credentials configured for {gmail_user}")
+            
             # Send email confirmation in background
             from email_service import send_booking_confirmation
             from datetime import datetime
