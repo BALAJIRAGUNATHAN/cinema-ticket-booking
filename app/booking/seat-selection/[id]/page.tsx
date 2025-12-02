@@ -246,12 +246,17 @@ export default function BookingPage({ params }: { params: Promise<{ id: string }
                 }),
             });
 
+            if (!res.ok) {
+                const error = await res.json();
+                throw new Error(error.detail || 'Failed to create payment intent');
+            }
+
             const data = await res.json();
             setClientSecret(data.clientSecret);
             setStep('payment');
-        } catch (e) {
+        } catch (e: any) {
             console.error(e);
-            alert('Failed to initialize payment');
+            alert(`Payment Error: ${e.message || 'Failed to initialize payment'}`);
         } finally {
             setLoading(false);
         }
