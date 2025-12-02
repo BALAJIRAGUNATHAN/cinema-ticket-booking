@@ -138,98 +138,63 @@ function CountdownTimer({ onExpire }: { onExpire: () => void }) {
 }
 
 export default function BookingPage({ params }: { params: Promise<{ id: string }> }) {
-    const [showtime, setShowtime] = useState<any>(null);
-    const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
-    const [unavailableSeats, setUnavailableSeats] = useState<string[]>([]);
-    const [clientSecret, setClientSecret] = useState<string | null>(null);
-    const [step, setStep] = useState<'seats' | 'details' | 'payment'>('seats');
-    const [customerDetails, setCustomerDetails] = useState({ name: '', email: '', phone: '' });
-    const [loading, setLoading] = useState(true);
-    const [userSession] = useState(() => `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
-    const router = useRouter();
+    const [couponCode, setCouponCode] = useState('');
+    const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+    const [discountAmount, setDiscountAmount] = useState(0);
+    const [couponError, setCouponError] = useState('');
+    const [validatingCoupon, setValidatingCoupon] = useState(false);
 
-    const [id, setId] = useState<string>('');
-    useEffect(() => {
-        params.then(p => setId(p.id));
-    }, [params]);
+    const handleApplyCoupon = async () => {
+        if (!couponCode.trim()) return;
 
-    useEffect(() => {
-        if (!id) return;
-        async function fetchShowtime() {
-            try {
-                const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-                const res = await fetch(`${API_URL}/showtimes`);
-                const data = await res.json();
-                const found = data.find((s: any) => s.id === id);
-                setShowtime(found);
+        setValidatingCoupon(true);
+        setCouponError('');
 
-                // Fetch unavailable seats
-                const seatsRes = await fetch(`${API_URL}/seats/available/${id}`);
-                const seatsData = await seatsRes.json();
-                setUnavailableSeats(seatsData.unavailable_seats || []);
-            } catch (e) {
-                console.error(e);
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetchShowtime();
-    }, [id]);
-
-    const toggleSeat = (seatId: string) => {
-        // Don't allow selecting unavailable seats
-        if (unavailableSeats.includes(seatId)) {
-            alert('This seat is already booked or locked by another user.');
-            return;
-        }
-
-        if (selectedSeats.includes(seatId)) {
-            setSelectedSeats(selectedSeats.filter(s => s !== seatId));
-        } else {
-            setSelectedSeats([...selectedSeats, seatId]);
-        }
-    };
-
-    const handleContinueToDetails = async () => {
-        if (selectedSeats.length === 0) return;
-
-        setLoading(true);
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-            const response = await fetch(`${API_URL}/seats/lock`, {
+            const originalAmount = (showtime.price * selectedSeats.length) / 100; // Convert to main currency unit for validation
+
+            const res = await fetch(`${API_URL}/offers/validate`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    showtime_id: id,
-                    seats: selectedSeats,
-                    user_session: userSession,
-                    customer_email: customerDetails.email || 'temp@example.com'
+                    coupon_code: couponCode,
+                    booking_amount: originalAmount
                 })
             });
 
-            if (!response.ok) {
-                const error = await response.json();
-                alert(error.detail || 'Failed to lock seats. They may have been taken by another user.');
-                // Refresh unavailable seats
-                const seatsRes = await fetch(`${API_URL}/seats/available/${id}`);
-                const seatsData = await seatsRes.json();
-                setUnavailableSeats(seatsData.unavailable_seats || []);
-                setSelectedSeats([]);
-                return;
-            }
+            const data = await res.json();
 
-            setStep('details');
-        } catch (e) {
-            console.error(e);
-            alert('Failed to lock seats. Please try again.');
+            if (!res.ok) {
+                setCouponError(data.detail || 'Invalid coupon');
+                setAppliedCoupon(null);
+                setDiscountAmount(0);
+            } else {
+                setAppliedCoupon(data.offer);
+                setDiscountAmount(data.discount_amount * 100); // Convert back to cents
+                setCouponError('');
+            }
+        } catch (error) {
+            console.error('Error validating coupon:', error);
+            setCouponError('Failed to validate coupon');
         } finally {
-            setLoading(false);
+            setValidatingCoupon(false);
         }
+    };
+
+    const removeCoupon = () => {
+        setAppliedCoupon(null);
+        setDiscountAmount(0);
+        setCouponCode('');
+        setCouponError('');
     };
 
     const handleDetailsSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
+
+        const originalTotal = showtime.price * selectedSeats.length;
+        const finalTotal = Math.max(0, originalTotal - discountAmount);
 
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -242,7 +207,9 @@ export default function BookingPage({ params }: { params: Promise<{ id: string }
                     customer_email: customerDetails.email,
                     customer_phone: customerDetails.phone,
                     seats: selectedSeats,
-                    total_amount: showtime.price * selectedSeats.length,
+                    total_amount: finalTotal,
+                    coupon_code: appliedCoupon ? appliedCoupon.coupon_code : null,
+                    discount_amount: discountAmount
                 }),
             });
 
@@ -265,6 +232,9 @@ export default function BookingPage({ params }: { params: Promise<{ id: string }
     const handlePaymentSuccess = async (paymentIntentId: string) => {
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+            const originalTotal = showtime.price * selectedSeats.length;
+            const finalTotal = Math.max(0, originalTotal - discountAmount);
+
             const response = await fetch(`${API_URL}/bookings/confirm`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -274,7 +244,9 @@ export default function BookingPage({ params }: { params: Promise<{ id: string }
                     customer_email: customerDetails.email,
                     customer_phone: customerDetails.phone,
                     seats: selectedSeats,
-                    total_amount: showtime.price * selectedSeats.length,
+                    total_amount: finalTotal,
+                    coupon_code: appliedCoupon ? appliedCoupon.coupon_code : null,
+                    discount_amount: discountAmount
                 })
             });
 
@@ -291,7 +263,9 @@ export default function BookingPage({ params }: { params: Promise<{ id: string }
                 customerName: customerDetails.name,
                 customerEmail: customerDetails.email,
                 customerPhone: customerDetails.phone,
-                totalAmount: showtime.price * selectedSeats.length,
+                totalAmount: finalTotal,
+                originalAmount: originalTotal,
+                discountAmount: discountAmount
             };
 
             sessionStorage.setItem('lastBooking', JSON.stringify(bookingDetails));
@@ -319,6 +293,8 @@ export default function BookingPage({ params }: { params: Promise<{ id: string }
 
     const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
     const cols = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+    const originalTotal = showtime.price * selectedSeats.length;
+    const finalTotal = Math.max(0, originalTotal - discountAmount);
 
     return (
         <div className="min-h-screen bg-[#0F172A] text-white">
@@ -552,6 +528,63 @@ export default function BookingPage({ params }: { params: Promise<{ id: string }
                                             </div>
                                         </div>
 
+                                        {/* Coupon Code Section */}
+                                        <div className="bg-white/5 rounded-xl p-6 border border-white/5 mt-6">
+                                            <h3 className="font-semibold text-gray-300 mb-4 text-sm uppercase tracking-wider">Offers & Coupons</h3>
+
+                                            {appliedCoupon ? (
+                                                <div className="flex items-center justify-between bg-green-500/10 border border-green-500/30 rounded-lg p-3">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-400">
+                                                            <Check className="w-4 h-4" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-bold text-green-400">{appliedCoupon.coupon_code}</p>
+                                                            <p className="text-xs text-green-300/70">
+                                                                {appliedCoupon.discount_type === 'PERCENTAGE'
+                                                                    ? `${appliedCoupon.discount_value}% OFF`
+                                                                    : `₹${appliedCoupon.discount_value} OFF`} applied
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={removeCoupon}
+                                                        className="text-gray-400 hover:text-white text-sm underline"
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="flex gap-2">
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Enter Coupon Code"
+                                                        className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all text-white placeholder-gray-600 uppercase font-mono"
+                                                        value={couponCode}
+                                                        onChange={e => {
+                                                            setCouponCode(e.target.value.toUpperCase());
+                                                            setCouponError('');
+                                                        }}
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={handleApplyCoupon}
+                                                        disabled={!couponCode || validatingCoupon}
+                                                        className="px-6 py-3 bg-white/10 text-white rounded-lg font-medium hover:bg-white/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        {validatingCoupon ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Apply'}
+                                                    </button>
+                                                </div>
+                                            )}
+                                            {couponError && (
+                                                <p className="text-red-400 text-sm mt-2 flex items-center gap-1">
+                                                    <AlertCircle className="w-3 h-3" />
+                                                    {couponError}
+                                                </p>
+                                            )}
+                                        </div>
+
                                         {/* Ticket Summary */}
                                         <div className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 rounded-xl p-6 border border-white/5 mt-8">
                                             <h3 className="font-semibold text-blue-400 mb-4 text-sm uppercase tracking-wider">Booking Summary</h3>
@@ -568,10 +601,22 @@ export default function BookingPage({ params }: { params: Promise<{ id: string }
                                                     <span className="text-gray-400">Seats</span>
                                                     <span className="font-medium text-yellow-500">{selectedSeats.join(', ')}</span>
                                                 </div>
+                                                <div className="flex justify-between text-sm">
+                                                    <span className="text-gray-400">Subtotal</span>
+                                                    <span className="font-medium">₹{(originalTotal / 100).toFixed(2)}</span>
+                                                </div>
+
+                                                {discountAmount > 0 && (
+                                                    <div className="flex justify-between text-sm text-green-400">
+                                                        <span>Discount</span>
+                                                        <span className="font-medium">- ₹{(discountAmount / 100).toFixed(2)}</span>
+                                                    </div>
+                                                )}
+
                                                 <div className="border-t border-white/10 pt-3 mt-3">
                                                     <div className="flex justify-between font-bold text-lg">
                                                         <span>Total Amount</span>
-                                                        <span className="text-green-400">₹{((showtime.price * selectedSeats.length) / 100).toFixed(2)}</span>
+                                                        <span className="text-green-400">₹{(finalTotal / 100).toFixed(2)}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -611,11 +656,17 @@ export default function BookingPage({ params }: { params: Promise<{ id: string }
                             <div className="bg-white/5 rounded-xl p-6 mb-8 border border-white/5">
                                 <div className="flex justify-between items-center mb-4">
                                     <h3 className="font-semibold text-gray-300">Total Payable</h3>
-                                    <span className="text-2xl font-bold text-green-400">₹{((showtime.price * selectedSeats.length) / 100).toFixed(2)}</span>
+                                    <span className="text-2xl font-bold text-green-400">₹{(finalTotal / 100).toFixed(2)}</span>
                                 </div>
                                 <div className="text-sm text-gray-400">
                                     Booking for <span className="text-white font-medium">{showtime.movie?.title}</span> • {selectedSeats.length} Seats
                                 </div>
+                                {appliedCoupon && (
+                                    <div className="mt-2 text-xs text-green-400 flex items-center gap-1">
+                                        <Check className="w-3 h-3" />
+                                        Coupon {appliedCoupon.coupon_code} applied
+                                    </div>
+                                )}
                             </div>
 
                             <Elements stripe={stripePromise} options={{
@@ -633,7 +684,7 @@ export default function BookingPage({ params }: { params: Promise<{ id: string }
                                 }
                             }}>
                                 <CheckoutForm
-                                    amount={showtime.price * selectedSeats.length}
+                                    amount={finalTotal}
                                     onSuccess={handlePaymentSuccess}
                                 />
                             </Elements>

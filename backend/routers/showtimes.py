@@ -11,7 +11,7 @@ router = APIRouter(
 @router.get("/")
 async def get_showtimes(include_expired: bool = False):
     """Get all showtimes, optionally filter out expired ones"""
-    query = supabase.table("showtimes").select("*, movie:movies(title), screen:screens(name, theater:theaters(name))").order("start_time", desc=False)
+    query = supabase.table("showtimes").select("*, movie:movies(*), screen:screens(name, theater:theaters(name))").order("start_time", desc=False)
     
     if not include_expired:
         # Only show future showtimes

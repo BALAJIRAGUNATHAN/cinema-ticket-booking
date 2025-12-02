@@ -37,3 +37,5 @@ class BookingCreate(BaseModel):
     customer_phone: str
     seats: List[str]
     total_amount: int
+    coupon_code: Optional[str] = None
+    discount_amount: Optional[int] = 0

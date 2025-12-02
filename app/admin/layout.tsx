@@ -65,6 +65,17 @@ export default function AdminLayout({
                         </div>
                         <span className="font-medium">Advertisements</span>
                     </Link>
+                    <Link
+                        href="/admin/offers"
+                        className="group flex items-center gap-3 px-4 py-3.5 text-purple-100 hover:bg-white/10 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20"
+                    >
+                        <div className="p-2 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-lg group-hover:from-green-500/30 group-hover:to-emerald-500/30 transition-all">
+                            <svg className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                            </svg>
+                        </div>
+                        <span className="font-medium">Offers</span>
+                    </Link>
                 </nav>
 
                 {/* Footer */}
