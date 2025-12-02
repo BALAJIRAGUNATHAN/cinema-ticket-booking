@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
@@ -138,11 +138,73 @@ function CountdownTimer({ onExpire }: { onExpire: () => void }) {
 }
 
 export default function BookingPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = use(params);
+    const router = useRouter();
+    const [showtime, setShowtime] = useState<any>(null);
+    const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
+    const [unavailableSeats, setUnavailableSeats] = useState<string[]>([]);
+    const [step, setStep] = useState<'seats' | 'details' | 'payment'>('seats');
+    const [loading, setLoading] = useState(true);
+    const [clientSecret, setClientSecret] = useState('');
+    const [customerDetails, setCustomerDetails] = useState({
+        name: '',
+        email: '',
+        phone: ''
+    });
+
     const [couponCode, setCouponCode] = useState('');
     const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
     const [discountAmount, setDiscountAmount] = useState(0);
     const [couponError, setCouponError] = useState('');
     const [validatingCoupon, setValidatingCoupon] = useState(false);
+
+    useEffect(() => {
+        const fetchShowtime = async () => {
+            try {
+                const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                const res = await fetch(`${API_URL}/showtimes/${id}`);
+                if (!res.ok) throw new Error('Failed to fetch showtime');
+                const data = await res.json();
+                setShowtime(data);
+
+                // Mock unavailable seats
+                const mockUnavailable = [];
+                const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+                const cols = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+                for (let i = 0; i < 15; i++) {
+                    const row = rows[Math.floor(Math.random() * rows.length)];
+                    const col = cols[Math.floor(Math.random() * cols.length)];
+                    mockUnavailable.push(`${row}${col}`);
+                }
+                setUnavailableSeats(mockUnavailable);
+            } catch (error) {
+                console.error('Error fetching showtime:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchShowtime();
+    }, [id]);
+
+    const toggleSeat = (seatId: string) => {
+        if (unavailableSeats.includes(seatId)) return;
+
+        setSelectedSeats(prev => {
+            if (prev.includes(seatId)) {
+                return prev.filter(id => id !== seatId);
+            }
+            if (prev.length >= 8) {
+                alert('You can select up to 8 seats max');
+                return prev;
+            }
+            return [...prev, seatId];
+        });
+    };
+
+    const handleContinueToDetails = () => {
+        setStep('details');
+    };
 
     const handleApplyCoupon = async () => {
         if (!couponCode.trim()) return;
