@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Plus, Calendar, Clock, MapPin, Trash2, RefreshCw } from 'lucide-react';
+import { Plus, Calendar, Clock, MapPin, Trash2, RefreshCw, Film } from 'lucide-react';
 
 export default function ShowtimesPage() {
     const [showtimes, setShowtimes] = useState<any[]>([]);
@@ -67,70 +67,117 @@ export default function ShowtimesPage() {
     };
 
     if (loading) {
-        return <div className="p-8 text-center">Loading showtimes...</div>;
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+            </div>
+        );
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
             <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold text-gray-900">Showtimes</h1>
+                <div>
+                    <h1 className="text-4xl font-bold bg-gradient-to-r from-green-400 via-emerald-400 to-green-400 bg-clip-text text-transparent">
+                        Showtimes
+                    </h1>
+                    <p className="text-purple-300/60 mt-2">Manage movie schedules and screenings</p>
+                </div>
                 <div className="flex gap-3">
                     <button
                         onClick={handleCleanup}
                         disabled={cleaning}
-                        className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
+                        className="flex items-center gap-2 px-4 py-2 bg-white/5 text-purple-200 border border-white/10 rounded-xl hover:bg-white/10 transition-all disabled:opacity-50 hover:scale-105"
                     >
                         <RefreshCw className={`w-4 h-4 ${cleaning ? 'animate-spin' : ''}`} />
                         Cleanup Expired
                     </button>
                     <Link
                         href="/admin/showtimes/new"
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        className="group flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-300 shadow-lg shadow-green-500/30 hover:shadow-green-500/50 hover:scale-105"
                     >
-                        <Plus className="w-4 h-4" />
-                        Add Showtime
+                        <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
+                        <span className="font-semibold">Add Showtime</span>
                     </Link>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {showtimes.length === 0 ? (
-                    <div className="col-span-full text-center py-12 bg-white rounded-xl border border-gray-100 text-gray-500">
-                        No showtimes scheduled. Create one to get started!
+                    <div className="col-span-full py-16 text-center bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10">
+                        <div className="flex flex-col items-center gap-4">
+                            <div className="p-6 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-full">
+                                <Calendar className="w-12 h-12 text-green-400" />
+                            </div>
+                            <div>
+                                <p className="text-xl font-semibold text-white mb-2">No showtimes scheduled</p>
+                                <p className="text-purple-300/60">Create a new showtime to get started!</p>
+                            </div>
+                        </div>
                     </div>
                 ) : (
                     showtimes.map((showtime: any) => {
                         const isExpired = new Date(showtime.start_time) < new Date();
                         return (
-                            <div key={showtime.id} className={`bg-white p-6 rounded-xl shadow-sm border ${isExpired ? 'border-red-100 bg-red-50' : 'border-gray-100'} hover:shadow-md transition-shadow relative group`}>
+                            <div
+                                key={showtime.id}
+                                className={`relative group p-6 rounded-2xl border backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-xl ${isExpired
+                                        ? 'bg-red-500/5 border-red-500/20 hover:border-red-500/40'
+                                        : 'bg-white/5 border-white/10 hover:border-green-500/30 hover:shadow-green-500/10'
+                                    }`}
+                            >
                                 <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button
                                         onClick={() => handleDelete(showtime.id)}
-                                        className="p-2 text-red-600 hover:bg-red-100 rounded-lg"
+                                        className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
                                         title="Delete Showtime"
                                     >
                                         <Trash2 className="w-4 h-4" />
                                     </button>
                                 </div>
 
-                                <h3 className="text-lg font-bold text-gray-900 mb-2 pr-8">{showtime.movie?.title}</h3>
-                                {isExpired && <span className="inline-block px-2 py-0.5 text-xs bg-red-100 text-red-700 rounded-full mb-2">Expired</span>}
+                                <div className="flex items-start justify-between mb-4 pr-8">
+                                    <h3 className="text-lg font-bold text-white line-clamp-1" title={showtime.movie?.title}>
+                                        {showtime.movie?.title}
+                                    </h3>
+                                </div>
 
-                                <div className="space-y-2 text-sm text-gray-600">
-                                    <div className="flex items-center gap-2">
-                                        <Calendar className="w-4 h-4 text-gray-400" />
-                                        <span>{new Date(showtime.start_time).toLocaleDateString()}</span>
+                                {isExpired && (
+                                    <span className="absolute top-4 right-12 px-2 py-0.5 text-xs bg-red-500/20 text-red-300 border border-red-500/30 rounded-full">
+                                        Expired
+                                    </span>
+                                )}
+
+                                <div className="space-y-3 text-sm">
+                                    <div className="flex items-center gap-3 text-purple-200/80">
+                                        <div className={`p-2 rounded-lg ${isExpired ? 'bg-red-500/10' : 'bg-green-500/10'}`}>
+                                            <Calendar className={`w-4 h-4 ${isExpired ? 'text-red-400' : 'text-green-400'}`} />
+                                        </div>
+                                        <span>{new Date(showtime.start_time).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <Clock className="w-4 h-4 text-gray-400" />
-                                        <span>{new Date(showtime.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+
+                                    <div className="flex items-center gap-3 text-purple-200/80">
+                                        <div className={`p-2 rounded-lg ${isExpired ? 'bg-red-500/10' : 'bg-blue-500/10'}`}>
+                                            <Clock className={`w-4 h-4 ${isExpired ? 'text-red-400' : 'text-blue-400'}`} />
+                                        </div>
+                                        <span className="font-mono text-base">{new Date(showtime.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <MapPin className="w-4 h-4 text-gray-400" />
+
+                                    <div className="flex items-center gap-3 text-purple-200/80">
+                                        <div className={`p-2 rounded-lg ${isExpired ? 'bg-red-500/10' : 'bg-purple-500/10'}`}>
+                                            <MapPin className={`w-4 h-4 ${isExpired ? 'text-red-400' : 'text-purple-400'}`} />
+                                        </div>
                                         <span>{showtime.screen?.theater?.name} - {showtime.screen?.name}</span>
                                     </div>
-                                    <div className="pt-2 font-semibold text-gray-900">
-                                        ${(showtime.price / 100).toFixed(2)}
+
+                                    <div className="pt-4 mt-4 border-t border-white/10 flex items-center justify-between">
+                                        <div className="flex gap-2">
+                                            <span className="px-2 py-1 text-xs bg-white/10 rounded text-purple-200">{showtime.format}</span>
+                                            <span className="px-2 py-1 text-xs bg-white/10 rounded text-purple-200">{showtime.language}</span>
+                                        </div>
+                                        <div className="font-bold text-lg text-white">
+                                            ${(showtime.price / 100).toFixed(2)}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
