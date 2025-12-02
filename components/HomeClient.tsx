@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { Calendar, Clock, Ticket } from 'lucide-react';
 import UpcomingMoviesBanner from '@/components/UpcomingMoviesBanner';
+import { useState, useEffect } from 'react';
 
 interface Movie {
     id: string;
@@ -13,11 +14,38 @@ interface Movie {
     release_date: string;
 }
 
+interface Advertisement {
+    id: string;
+    title: string;
+    image_url: string;
+    link_url: string | null;
+    is_active: boolean;
+    display_order: number;
+}
+
 interface HomeClientProps {
     movies: Movie[];
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
 export default function HomeClient({ movies }: HomeClientProps) {
+    const [ads, setAds] = useState<Advertisement[]>([]);
+
+    useEffect(() => {
+        fetchAds();
+    }, []);
+
+    const fetchAds = async () => {
+        try {
+            const res = await fetch(`${API_URL}/ads`);
+            const data = await res.json();
+            setAds(data);
+        } catch (error) {
+            console.error('Error fetching ads:', error);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-[#0F172A] text-white">
             {/* Header */}
@@ -42,6 +70,61 @@ export default function HomeClient({ movies }: HomeClientProps) {
             <div className="pt-20">
                 <UpcomingMoviesBanner />
             </div>
+
+            {/* Advertisements Section */}
+            {ads.length > 0 && (
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+                    <div className="flex items-center gap-4 mb-8">
+                        <div className="h-8 w-1 bg-gradient-to-b from-orange-500 to-pink-500 rounded-full"></div>
+                        <h3 className="text-3xl font-bold text-white">Special Offers</h3>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {ads.map((ad) => (
+                            ad.link_url ? (
+                                <a
+                                    key={ad.id}
+                                    href={ad.link_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="group relative overflow-hidden rounded-2xl glass-card hover:scale-105 transition-all duration-300 hover:shadow-2xl hover:shadow-orange-500/20"
+                                >
+                                    <div className="aspect-[16/9] relative">
+                                        <img
+                                            src={ad.image_url}
+                                            alt={ad.title}
+                                            className="w-full h-full object-cover"
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                                        <div className="absolute bottom-0 left-0 right-0 p-6">
+                                            <h4 className="text-xl font-bold text-white group-hover:text-yellow-400 transition-colors">
+                                                {ad.title}
+                                            </h4>
+                                            <p className="text-sm text-gray-300 mt-1">Click to learn more →</p>
+                                        </div>
+                                    </div>
+                                </a>
+                            ) : (
+                                <div
+                                    key={ad.id}
+                                    className="relative overflow-hidden rounded-2xl glass-card"
+                                >
+                                    <div className="aspect-[16/9] relative">
+                                        <img
+                                            src={ad.image_url}
+                                            alt={ad.title}
+                                            className="w-full h-full object-cover"
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                                        <div className="absolute bottom-0 left-0 right-0 p-6">
+                                            <h4 className="text-xl font-bold text-white">{ad.title}</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            )
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {/* Tagline Section */}
             <div className="relative py-24 overflow-hidden">
@@ -69,10 +152,10 @@ export default function HomeClient({ movies }: HomeClientProps) {
                         <p className="text-gray-400 text-lg">No movies currently showing. Check back later!</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                         {movies.map((movie) => (
                             <Link key={movie.id} href={`/movie/${movie.id}`} className="group">
-                                <div className="glass-card rounded-xl overflow-hidden transition-all duration-500 hover:transform hover:scale-105 hover:shadow-2xl hover:shadow-purple-900/20 h-full flex flex-col">
+                                <div className="glass-card rounded-xl overflow-hidden transition-all duration-500 hover:transform hover:scale-[1.03] hover:shadow-2xl hover:shadow-purple-900/30 h-full flex flex-col border border-white/10 hover:border-yellow-500/50">
                                     <div className="aspect-[2/3] relative overflow-hidden">
                                         {movie.poster_url ? (
                                             <img
@@ -88,14 +171,14 @@ export default function HomeClient({ movies }: HomeClientProps) {
                                         <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-transparent to-transparent opacity-60"></div>
 
                                         <div className="absolute bottom-0 left-0 w-full p-4 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                                            <span className="inline-block px-2 py-1 bg-yellow-500 text-[#0F172A] text-xs font-bold rounded mb-2">
+                                            <span className="inline-block px-3 py-1 bg-gradient-to-r from-yellow-500 to-yellow-600 text-[#0F172A] text-xs font-bold rounded-full mb-2 shadow-lg">
                                                 {movie.genre.split(',')[0]}
                                             </span>
                                         </div>
                                     </div>
 
-                                    <div className="p-5 flex-1 flex flex-col">
-                                        <h4 className="text-xl font-bold text-white mb-2 line-clamp-1 group-hover:text-yellow-400 transition-colors">
+                                    <div className="p-5 flex-1 flex flex-col bg-gradient-to-b from-slate-900/80 to-slate-900/90">
+                                        <h4 className="text-xl font-bold text-white mb-2 line-clamp-2 group-hover:text-yellow-400 transition-colors">
                                             {movie.title}
                                         </h4>
 

@@ -96,11 +96,14 @@ def send_booking_confirmation(
         msg.attach(part)
         
         # Send email
+        print(f"📤 Connecting to Gmail SMTP server...")
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+            print(f"🔐 Authenticating with Gmail...")
             server.login(GMAIL_USER, GMAIL_APP_PASSWORD)
+            print(f"📨 Sending message...")
             server.send_message(msg)
         
-        print(f"Email sent successfully to {customer_email}")
+        print(f"✅ Email sent successfully to {customer_email}")
         return True
         
     except Exception as e:
