@@ -168,3 +168,27 @@ async def confirm_booking(booking_details: BookingCreate, background_tasks: Back
         traceback.print_exc()
         raise HTTPException(status_code=400, detail=str(e))
 
+@router.get("/showtime/{showtime_id}/seats")
+async def get_booked_seats(showtime_id: str):
+    """Get all booked seats for a specific showtime"""
+    try:
+        # Fetch all bookings for this showtime that are paid
+        response = supabase.table("bookings").select("seats").eq("showtime_id", showtime_id).eq("payment_status", "paid").execute()
+        
+        booked_seats = []
+        if response.data:
+            for booking in response.data:
+                # seats is stored as a list of strings in the JSONB column or array
+                seats = booking.get("seats", [])
+                if isinstance(seats, list):
+                    booked_seats.extend(seats)
+                elif isinstance(seats, str):
+                    # Handle case where it might be stored as comma-separated string
+                    booked_seats.extend([s.strip() for s in seats.split(",")])
+                    
+        # Remove duplicates just in case
+        return list(set(booked_seats))
+    except Exception as e:
+        print(f"❌ Error fetching booked seats: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
+

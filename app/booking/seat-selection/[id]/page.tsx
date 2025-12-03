@@ -167,16 +167,15 @@ export default function BookingPage({ params }: { params: Promise<{ id: string }
                 const data = await res.json();
                 setShowtime(data);
 
-                // Mock unavailable seats
-                const mockUnavailable = [];
-                const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-                const cols = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-                for (let i = 0; i < 15; i++) {
-                    const row = rows[Math.floor(Math.random() * rows.length)];
-                    const col = cols[Math.floor(Math.random() * cols.length)];
-                    mockUnavailable.push(`${row}${col}`);
+                // Fetch booked seats
+                const seatsRes = await fetch(`${API_URL}/bookings/showtime/${id}/seats`);
+                if (seatsRes.ok) {
+                    const bookedSeats = await seatsRes.json();
+                    setUnavailableSeats(bookedSeats);
+                } else {
+                    console.error('Failed to fetch booked seats');
+                    setUnavailableSeats([]);
                 }
-                setUnavailableSeats(mockUnavailable);
             } catch (error) {
                 console.error('Error fetching showtime:', error);
             } finally {
