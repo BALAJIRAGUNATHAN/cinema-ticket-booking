@@ -146,36 +146,36 @@ export default function MovieBookingPage({ params }: { params: Promise<{ id: str
     }
 
     return (
-        <div className="min-h-screen bg-[#0F172A] text-white pb-20">
+        <div className="min-h-screen bg-[#020617] text-white pb-20 selection:bg-yellow-500/30">
             {/* Header */}
-            <div className="bg-[#1a1a2e] border-b border-white/10">
+            <div className="fixed top-0 left-0 right-0 z-50 bg-[#020617]/80 backdrop-blur-md border-b border-white/5">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                     <div className="flex items-center gap-4 mb-4">
                         <Link
                             href={`/movie/${movieId}`}
-                            className="p-2 hover:bg-white/10 rounded-full transition-colors"
+                            className="p-2 hover:bg-white/10 rounded-full transition-colors border border-white/10 hover:border-yellow-500/50"
                         >
                             <ArrowLeft className="w-6 h-6" />
                         </Link>
                         <div>
-                            <h1 className="text-3xl font-bold">{movie.title}</h1>
-                            <p className="text-gray-400 mt-1">{movie.genre} • {movie.duration} mins</p>
+                            <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">{movie.title}</h1>
+                            <p className="text-gray-400 mt-1 font-light">{movie.genre} • {movie.duration} mins</p>
                         </div>
                     </div>
 
                     {/* Language & Format Filter Button */}
                     <button
                         onClick={() => setIsModalOpen(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/15 rounded-lg border border-white/20 transition-all"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 hover:border-yellow-500/50 transition-all backdrop-blur-sm"
                     >
-                        <Filter className="w-4 h-4" />
+                        <Filter className="w-4 h-4 text-yellow-500" />
                         <span className="font-medium">{selectedLanguage} • {selectedFormat}</span>
                     </button>
                 </div>
             </div>
 
             {/* Content */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-40 pb-8 space-y-8">
                 {/* Date Selector */}
                 <DateSelector
                     selectedDate={selectedDate}
@@ -185,58 +185,64 @@ export default function MovieBookingPage({ params }: { params: Promise<{ id: str
                 {/* Theater Listings */}
                 <div className="space-y-6">
                     <div className="flex items-center justify-between">
-                        <h2 className="text-2xl font-bold flex items-center gap-3">
-                            <span className="w-1.5 h-8 bg-gradient-to-b from-yellow-400 to-yellow-600 rounded-full"></span>
+                        <h2 className="text-3xl font-bold flex items-center gap-3">
+                            <span className="w-1.5 h-10 bg-gradient-to-b from-yellow-400 to-yellow-600 rounded-full shadow-[0_0_15px_rgba(234,179,8,0.5)]"></span>
                             Available Theaters
                         </h2>
-                        <div className="flex items-center gap-2 text-sm text-gray-400">
-                            <CalendarIcon className="w-4 h-4" />
+                        <div className="flex items-center gap-2 text-sm text-gray-400 font-light">
+                            <CalendarIcon className="w-4 h-4 text-yellow-500" />
                             <span>{new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</span>
                         </div>
                     </div>
 
                     {Object.keys(theaterGroups).length === 0 ? (
-                        <div className="p-12 rounded-2xl bg-white/5 backdrop-blur-sm text-center border border-white/10">
-                            <CalendarIcon className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                            <p className="text-gray-400 text-lg">No showtimes available for this date.</p>
+                        <div className="p-16 rounded-3xl bg-[#0F172A]/50 backdrop-blur-sm text-center border border-white/5">
+                            <CalendarIcon className="w-16 h-16 text-gray-600 mx-auto mb-4 opacity-50" />
+                            <p className="text-gray-400 text-lg font-light">No showtimes available for this date.</p>
                             <p className="text-gray-500 text-sm mt-2">Try selecting a different date or format.</p>
                         </div>
                     ) : (
-                        <div className="space-y-4">
+                        <div className="space-y-5">
                             {Object.values(theaterGroups).map((theater: any) => (
-                                <div key={theater.name} className="rounded-2xl overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10 hover:border-yellow-500/30 transition-all">
+                                <div key={theater.name} className="group rounded-3xl overflow-hidden bg-[#0F172A]/50 backdrop-blur-sm border border-white/5 hover:border-yellow-500/30 transition-all duration-500 hover:shadow-[0_0_30px_rgba(234,179,8,0.1)]">
                                     {/* Theater Header */}
-                                    <div className="px-6 py-4 border-b border-white/10 bg-gradient-to-r from-white/5 to-transparent">
-                                        <h3 className="text-xl font-bold text-white mb-1">{theater.name}</h3>
+                                    <div className="px-8 py-5 border-b border-white/5 bg-gradient-to-r from-white/5 to-transparent">
+                                        <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-yellow-400 transition-colors">{theater.name}</h3>
                                         {theater.location && (
-                                            <div className="flex items-center gap-2 text-sm text-gray-400">
+                                            <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
                                                 <MapPin className="w-4 h-4 text-yellow-500" />
-                                                <span>{theater.location}</span>
+                                                <span className="font-light">{theater.location}</span>
                                             </div>
                                         )}
-                                        <div className="mt-2 text-xs text-green-400 font-medium">
-                                            ✓ Cancellation available
+                                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-xs text-green-400 font-medium">
+                                            <span className="w-1.5 h-1.5 bg-green-400 rounded-full"></span>
+                                            Cancellation available
                                         </div>
                                     </div>
 
                                     {/* Showtimes */}
-                                    <div className="p-6">
-                                        <div className="flex flex-wrap gap-3">
+                                    <div className="p-8">
+                                        <div className="flex flex-wrap gap-4">
                                             {theater.showtimes.map((showtime: Showtime) => (
                                                 <Link
                                                     key={showtime.id}
-                                                    href={`/booking/${showtime.id}`}
-                                                    className="group"
+                                                    href={`/booking/seat-selection/${showtime.id}`}
+                                                    className="group/time relative"
                                                 >
-                                                    <div className="px-6 py-3 border-2 border-green-500/30 rounded-lg hover:border-green-500 hover:bg-green-500/10 transition-all text-center group-hover:shadow-lg group-hover:shadow-green-500/20 transform group-hover:scale-105 min-w-[120px]">
-                                                        <div className="text-lg font-bold text-green-400 group-hover:text-green-300 transition-colors">
-                                                            {new Date(showtime.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                        </div>
-                                                        <div className="text-xs text-gray-400 mt-1">
-                                                            {showtime.screen?.name}
-                                                        </div>
-                                                        <div className="text-sm font-semibold text-white mt-1">
-                                                            ₹{(showtime.price / 100).toFixed(2)}
+                                                    <div className="relative px-6 py-4 border-2 border-white/10 rounded-xl hover:border-yellow-500 hover:bg-yellow-500/5 transition-all text-center transform hover:scale-105 min-w-[140px] backdrop-blur-sm">
+                                                        {/* Glow effect on hover */}
+                                                        <div className="absolute inset-0 bg-yellow-500/0 group-hover/time:bg-yellow-500/5 rounded-xl blur-xl transition-all"></div>
+
+                                                        <div className="relative">
+                                                            <div className="text-xl font-bold text-white group-hover/time:text-yellow-400 transition-colors">
+                                                                {new Date(showtime.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            </div>
+                                                            <div className="text-xs text-gray-500 mt-1 font-mono uppercase tracking-wider">
+                                                                {showtime.screen?.name}
+                                                            </div>
+                                                            <div className="text-sm font-semibold text-yellow-500 mt-2">
+                                                                ₹{(showtime.price / 100).toFixed(2)}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </Link>

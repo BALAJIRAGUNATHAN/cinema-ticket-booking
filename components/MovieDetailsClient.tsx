@@ -160,13 +160,13 @@ export default function MovieDetailsClient({ movie, showtimes }: MovieDetailsCli
 
                             {/* Action Buttons */}
                             <div className="flex items-center gap-5 pt-4">
-                                <button
-                                    onClick={() => setIsModalOpen(true)}
+                                <Link
+                                    href={`/booking/movie/${movie.id}`}
                                     className="flex items-center gap-3 px-10 py-4 bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-300 hover:to-yellow-500 text-[#020617] rounded-xl font-bold text-lg shadow-[0_0_30px_rgba(234,179,8,0.3)] transition-all transform hover:-translate-y-1 hover:shadow-[0_0_40px_rgba(234,179,8,0.5)]"
                                 >
                                     <Ticket className="w-5 h-5" />
                                     Book Tickets
-                                </button>
+                                </Link>
                                 {movie.trailer_url && (
                                     <a
                                         href={movie.trailer_url}
