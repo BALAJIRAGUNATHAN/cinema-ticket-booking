@@ -130,13 +130,10 @@ async def confirm_booking(booking_details: BookingCreate, background_tasks: Back
             
             # Check email credentials before adding background task
             import os
-            gmail_user = os.environ.get("GMAIL_USER", "").strip()
-            gmail_password = os.environ.get("GMAIL_APP_PASSWORD", "").strip()
+            resend_api_key = os.environ.get("RESEND_API_KEY", "").strip()
             
-            if not gmail_user or not gmail_password:
-                print(f"⚠️ WARNING: Email credentials not configured. Email will not be sent.")
-                print(f"GMAIL_USER set: {bool(gmail_user)}")
-                print(f"GMAIL_APP_PASSWORD set: {bool(gmail_password)}")
+            if not resend_api_key:
+                print(f"⚠️ WARNING: RESEND_API_KEY not configured. Email will not be sent.")
             else:
                 print(f"✅ Email credentials configured (Resend)")
             
