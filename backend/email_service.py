@@ -133,6 +133,31 @@ def send_booking_confirmation(
         return True
         
     except Exception as e:
+        error_msg = str(e)
+        # Check for Resend testing limitation error
+        if "only send testing emails to your own email address" in error_msg:
+            print(f"⚠️ Resend Testing Limitation: Cannot send to {customer_email}")
+            
+            # Extract the verified email from the error message if possible, or fallback to a known one
+            # The error message is: "You can only send testing emails to your own email address (balajiragunathan5911@gmail.com)..."
+            import re
+            match = re.search(r'\(([^)]+)\)', error_msg)
+            fallback_email = match.group(1) if match else "balajiragunathan5911@gmail.com"
+            
+            print(f"🔄 Retrying with verified email: {fallback_email}")
+            
+            try:
+                # Update subject to indicate who the email was actually for
+                params["to"] = [fallback_email]
+                params["subject"] = f"[TEST MODE] For {customer_email}: {params['subject']}"
+                
+                response = resend.Emails.send(params)
+                print(f"✅ Email sent to verified address ({fallback_email}) successfully! ID: {response.get('id', 'N/A')}")
+                return True
+            except Exception as retry_error:
+                print(f"❌ Failed to send fallback email: {retry_error}")
+                return False
+        
         print(f"❌ Failed to send email via Resend: {e}")
         import traceback
         traceback.print_exc()
