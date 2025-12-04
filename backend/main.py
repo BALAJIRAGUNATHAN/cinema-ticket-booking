@@ -1,33 +1,44 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from dotenv import load_dotenv
 import os
+from rate_limiter import limiter
+from slowapi.errors import RateLimitExceeded
+from slowapi import _rate_limit_exceeded_handler
 
 load_dotenv()
 
 app = FastAPI(title="Movie Booking System API")
 
-# Add Gzip Compression Middleware (must be added before CORS)
+# Add rate limiter to app
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# Add Gzip compression middleware (must be before CORS)
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
-# Optimize CORS - In production, replace "*" with your frontend URL
-FRONTEND_URL = os.environ.get("FRONTEND_URL", "*")
+# Get frontend URL from environment
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+
+# CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[FRONTEND_URL] if FRONTEND_URL != "*" else ["*"],
+    allow_origins=[FRONTEND_URL] if os.getenv("ENVIRONMENT") == "production" else ["*"],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["*"],
     allow_headers=["*"],
-    max_age=3600,  # Cache preflight requests for 1 hour
-)
+    max_age=3600,
+) # Cache preflight requests for 1 hour
 
 @app.get("/")
-def read_root():
+@limiter.limit("100/minute")
+def read_root(request: Request):
     return {"message": "Welcome to Movie Booking System API", "status": "running"}
 
 @app.get("/health")
-def health_check():
+@limiter.limit("60/minute")
+def health_check(request: Request):
     """Health check endpoint for monitoring"""
     return {
         "status": "healthy",
@@ -36,7 +47,8 @@ def health_check():
     }
 
 @app.get("/cache-stats")
-def get_cache_statistics():
+@limiter.limit("30/minute")
+def get_cache_statistics(request: Request):
     """Get Redis cache statistics"""
     from cache_middleware import get_cache_stats
     return get_cache_stats()
