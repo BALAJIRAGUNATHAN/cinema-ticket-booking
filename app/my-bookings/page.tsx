@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useState, useEffect } from 'react'
 import { Ticket, Calendar, MapPin, Clock, Loader2, Film } from 'lucide-react'
 import Link from 'next/link'
+import { supabase } from '@/lib/supabase'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
@@ -27,7 +28,7 @@ function MyBookingsContent() {
 
     const fetchBookings = async () => {
         try {
-            const session = await user?.getSession()
+            const { data: { session } } = await supabase.auth.getSession()
             const token = session?.access_token
 
             const res = await fetch(`${API_URL}/users/bookings`, {
@@ -164,8 +165,8 @@ function MyBookingsContent() {
                                         <div className="flex justify-between text-sm">
                                             <span className="text-gray-400">Status:</span>
                                             <span className={`font-medium ${booking.payment_status === 'completed'
-                                                    ? 'text-green-400'
-                                                    : 'text-yellow-400'
+                                                ? 'text-green-400'
+                                                : 'text-yellow-400'
                                                 }`}>
                                                 {booking.payment_status}
                                             </span>

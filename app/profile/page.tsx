@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react'
 import { User, Mail, Phone, Camera, Loader2, Check } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { supabase } from '@/lib/supabase'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
@@ -34,7 +35,7 @@ function ProfileContent() {
 
     const fetchProfile = async () => {
         try {
-            const session = await user?.getSession()
+            const { data: { session } } = await supabase.auth.getSession()
             const token = session?.access_token
 
             const res = await fetch(`${API_URL}/users/profile`, {
@@ -63,7 +64,7 @@ function ProfileContent() {
         setSaving(true)
 
         try {
-            const session = await user?.getSession()
+            const { data: { session } } = await supabase.auth.getSession()
             const token = session?.access_token
 
             const res = await fetch(`${API_URL}/users/profile`, {
