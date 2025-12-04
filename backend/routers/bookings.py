@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from database import supabase
-from models import BookingCreate
+from models import BookingCreate, BookingConfirmation
 from auth_middleware import get_current_user_optional
 import stripe
 import os
