@@ -25,10 +25,20 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 # Get frontend URL from environment
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
-# Configure CORS - Allow both local and production frontends
+# CORS configuration - Allow production frontend
+allowed_origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://movie-booking-frontend-fe15.onrender.com",
+]
+
+# In production, allow all origins temporarily for debugging
+if os.getenv("ENVIRONMENT") == "production":
+    allowed_origins = ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[FRONTEND_URL] if os.getenv("ENVIRONMENT") == "production" else ["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
