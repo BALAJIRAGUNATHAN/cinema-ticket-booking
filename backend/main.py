@@ -53,7 +53,7 @@ def get_cache_statistics(request: Request):
     from cache_middleware import get_cache_stats
     return get_cache_stats()
 
-from routers import movies, showtimes, bookings, seats, upcoming_movies, screens, ads, offers
+from routers import movies, showtimes, bookings, seats, upcoming_movies, screens, ads, offers, users
 
 app.include_router(movies.router)
 app.include_router(showtimes.router)
@@ -63,4 +63,5 @@ app.include_router(seats.router)
 app.include_router(upcoming_movies.router)
 app.include_router(screens.router)
 app.include_router(offers.router)
+app.include_router(users.router)
 

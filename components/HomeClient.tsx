@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { Calendar, Clock, MapPin, Search, Ticket, ArrowRight, Clapperboard, Star } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { AdSliderSkeleton, MovieGridSkeleton } from './Skeletons';
 
 interface Movie {
     id: string;
@@ -34,7 +33,6 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 export default function HomeClient({ movies }: HomeClientProps) {
     const [ads, setAds] = useState<Advertisement[]>([]);
     const [currentAdIndex, setCurrentAdIndex] = useState(0);
-    const [adsLoading, setAdsLoading] = useState(true);
 
     useEffect(() => {
         fetchAds();
@@ -52,14 +50,11 @@ export default function HomeClient({ movies }: HomeClientProps) {
 
     const fetchAds = async () => {
         try {
-            setAdsLoading(true);
             const res = await fetch(`${API_URL}/ads`);
             const data = await res.json();
             setAds(data);
         } catch (error) {
             console.error('Error fetching ads:', error);
-        } finally {
-            setAdsLoading(false);
         }
     };
 
@@ -128,15 +123,12 @@ export default function HomeClient({ movies }: HomeClientProps) {
                     </p>
 
                     {/* Advertisement Slider */}
-                    {adsLoading ? (
-                        <AdSliderSkeleton />
-                    ) : ads.length > 0 ? (
-                        <div className="relative h-[400px] rounded-3xl overflow-hidden group mt-16">
-                            {/* Slider Container */}
+                    {ads.length > 0 && (
+                        <div className="relative max-w-5xl mx-auto rounded-3xl overflow-hidden shadow-2xl shadow-black/50 border border-white/10 aspect-[21/9] group">
                             {ads.map((ad, index) => (
                                 <div
                                     key={ad.id}
-                                    className={`absolute inset-0 transition-opacity duration-700 ${index === currentAdIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                                    className={`absolute inset-0 transition-all duration-700 ease-in-out ${index === currentAdIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
                                         }`}
                                 >
                                     {ad.link_url ? (
@@ -173,7 +165,7 @@ export default function HomeClient({ movies }: HomeClientProps) {
                                 ))}
                             </div>
                         </div>
-                    ) : null}
+                    )}
                 </div>
             </div>
 
@@ -200,44 +192,74 @@ export default function HomeClient({ movies }: HomeClientProps) {
                             <p className="text-gray-400">Check back later for new releases.</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8">
                             {movies.map((movie) => (
-                                <Link
-                                    key={movie.id}
-                                    href={`/movie/${movie.id}`}
-                                    className="group relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:border-yellow-500/30 transition-all duration-500 hover:shadow-[0_0_40px_rgba(234,179,8,0.15)] hover:-translate-y-2"
-                                >
-                                    <div className="relative aspect-[2/3] overflow-hidden">
-                                        {/* Rating Badge */}
-                                        <div className="absolute top-3 right-3 z-10 px-3 py-1.5 bg-black/60 backdrop-blur-md rounded-full border border-yellow-500/30 flex items-center gap-1.5">
-                                            <Star className="w-3.5 h-3.5 fill-yellow-500 text-yellow-500" />
-                                            <span className="text-xs font-bold text-yellow-500">{movie.rating || '8.5'}/10</span>
+                                <Link key={movie.id} href={`/movie/${movie.id}`} className="group perspective-[1000px]">
+                                    <div className="relative transform-style-3d transition-all duration-500 group-hover:-translate-y-2">
+                                        {/* Poster Container */}
+                                        <div className="aspect-[2/3] relative rounded-2xl overflow-hidden shadow-2xl shadow-black/50 border border-white/10 group-hover:border-yellow-500/50 group-hover:shadow-[0_0_30px_rgba(212,175,55,0.15)] transition-all duration-500">
+                                            {movie.poster_url ? (
+                                                <img
+                                                    src={movie.poster_url}
+                                                    alt={movie.title}
+                                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex flex-col items-center justify-center bg-white/5 text-gray-500 gap-2">
+                                                    <Clapperboard className="w-8 h-8 opacity-50" />
+                                                    <span className="text-xs uppercase tracking-widest">No Poster</span>
+                                                </div>
+                                            )}
+
+                                            {/* Overlay Gradient */}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
+
+                                            {/* Rating Badge */}
+                                            <div className="absolute top-3 left-3 px-2.5 py-1 bg-black/60 backdrop-blur-md border border-white/10 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-lg">
+                                                <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                                                <span>{movie.rating ? movie.rating : '8.5'}</span>
+                                            </div>
+
+                                            {/* Hover Action */}
+                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40 backdrop-blur-[2px]">
+                                                <div className="px-6 py-3 bg-yellow-500 text-[#020617] font-bold rounded-xl transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 shadow-lg shadow-yellow-500/20">
+                                                    Book Now
+                                                </div>
+                                            </div>
                                         </div>
 
-                                        {/* Poster */}
-                                        <img
-                                            src={movie.poster_url}
-                                            alt={movie.title}
-                                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                        />
-
-                                        {/* Overlay */}
-                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40 backdrop-blur-[2px]">
-                                            <div className="px-6 py-3 bg-yellow-500 text-[#020617] font-bold rounded-xl transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 shadow-lg shadow-yellow-500/20">
-                                                Book Now
-                                            </div>
-                                            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-                                                <div className="flex items-center justify-center gap-3 mb-6">
-                                                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-lg shadow-yellow-500/20">
-                                                        <span className="font-bold text-[#020617]">C</span>
-                                                    </div>
-                                                    <span className="text-2xl font-bold text-white tracking-tight">Cine<span className="text-gradient-gold">Spot</span></span>
-                                                </div>
-                                                <p className="text-gray-500 text-sm">
-                                                    © 2024 CineSpot. Experience Cinema Like Never Before.
-                                                </p>
-                                            </div>
-                                        </footer>
+                                        {/* Info */}
+                                        <div className="mt-4 space-y-1">
+                                            <h3 className="font-bold text-white text-lg leading-tight group-hover:text-yellow-500 transition-colors line-clamp-1">
+                                                {movie.title}
+                                            </h3>
+                                            <p className="text-sm text-gray-400 line-clamp-1">
+                                                {movie.genre.split(',')[0]} • {Math.floor(movie.duration / 60)}h {movie.duration % 60}m
+                                            </p>
+                                        </div>
                                     </div>
-                                    );
+                                </Link>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </main>
+
+            {/* Footer */}
+            <footer className="bg-[#020617] border-t border-white/5 py-12 relative overflow-hidden">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-1 bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+                    <div className="flex items-center justify-center gap-3 mb-6">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-lg shadow-yellow-500/20">
+                            <span className="font-bold text-[#020617]">C</span>
+                        </div>
+                        <span className="text-2xl font-bold text-white tracking-tight">Cine<span className="text-gradient-gold">Spot</span></span>
+                    </div>
+                    <p className="text-gray-500 text-sm">
+                        © 2024 CineSpot. Experience Cinema Like Never Before.
+                    </p>
+                </div>
+            </footer>
+        </div>
+    );
 }
