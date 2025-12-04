@@ -4,8 +4,8 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 async function getMovies() {
   try {
-    console.log('Fetching movies from:', API_URL);
-    const res = await fetch(`${API_URL}/movies`, {
+    console.log('Fetching movies with showtimes from:', API_URL);
+    const res = await fetch(`${API_URL}/movies/with-showtimes`, {
       cache: 'no-store',
       headers: {
         'Content-Type': 'application/json',
@@ -18,7 +18,7 @@ async function getMovies() {
     }
 
     const data = await res.json();
-    console.log('Successfully fetched', data.length, 'movies');
+    console.log('Successfully fetched', data.length, 'movies with showtimes');
     return data;
   } catch (error) {
     console.error('Error fetching movies:', error);

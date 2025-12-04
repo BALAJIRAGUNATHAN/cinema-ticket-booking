@@ -3,6 +3,7 @@ from database import supabase
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
+from cache_middleware import cache_response, invalidate_cache_pattern, CACHE_TTL
 
 router = APIRouter(
     prefix="/offers",
@@ -46,6 +47,7 @@ class CouponValidate(BaseModel):
     booking_amount: float
 
 @router.get("/")
+@cache_response(ttl=CACHE_TTL["offers"], key_prefix="offers")
 async def get_active_offers():
     try:
         now = datetime.utcnow().isoformat()
@@ -79,6 +81,10 @@ async def create_offer(offer: OfferCreate):
         response = supabase.table("offers").insert(offer_data).execute()
         if not response.data:
             raise HTTPException(status_code=500, detail="Failed to create offer")
+        
+        # Invalidate offers cache
+        invalidate_cache_pattern("offers")
+        
         return response.data[0]
     except HTTPException:
         raise

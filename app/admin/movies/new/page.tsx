@@ -65,7 +65,7 @@ export default function NewMoviePage() {
 
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-            const res = await fetch(`${API_URL}/movies`, {
+            const res = await fetch(`${API_URL}/movies/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from database import supabase
 from pydantic import BaseModel
 from typing import Optional
+from cache_middleware import cache_response, invalidate_cache_pattern, CACHE_TTL
 
 router = APIRouter(
     prefix="/ads",
@@ -26,6 +27,7 @@ class AdUpdate(BaseModel):
     display_order: Optional[int] = None
 
 @router.get("/")
+@cache_response(ttl=CACHE_TTL["ads"], key_prefix="ads")
 async def get_ads():
     try:
         # Fetch active ads ordered by display_order
@@ -49,6 +51,10 @@ async def create_ad(ad: AdCreate):
         response = supabase.table("advertisements").insert(ad.dict()).execute()
         if not response.data:
             raise HTTPException(status_code=500, detail="Failed to create advertisement")
+        
+        # Invalidate ads cache
+        invalidate_cache_pattern("ads")
+        
         return response.data[0]
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

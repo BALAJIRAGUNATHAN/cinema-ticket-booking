@@ -60,7 +60,7 @@ export default function NewShowtimePage() {
             const start_time = new Date(`${formData.date}T${formData.time}`).toISOString();
             const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-            const res = await fetch(`${API_URL}/showtimes`, {
+            const res = await fetch(`${API_URL}/showtimes/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
