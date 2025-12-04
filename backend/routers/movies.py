@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from database import supabase
-from models import MovieCreate, Movie
+from models import MovieCreate
 from cache_middleware import cache_response, invalidate_cache_pattern, CACHE_TTL
 from datetime import datetime
 
