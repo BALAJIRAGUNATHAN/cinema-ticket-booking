@@ -126,7 +126,9 @@ async def validate_coupon(data: CouponValidate):
             raise HTTPException(status_code=404, detail="Invalid coupon code")
         
         offer = response.data[0]
-        now = datetime.utcnow()
+        # Use timezone-aware datetime to match database timestamps
+        from datetime import timezone
+        now = datetime.now(timezone.utc)
         
         # Check if active
         if not offer['is_active']:
