@@ -20,14 +20,13 @@ async def get_movies():
 async def get_movies_with_showtimes():
     """Get only movies that have active (future) showtimes"""
     try:
-        # Get current time
+        # Use RPC to get movies with active showtimes
         now = datetime.utcnow().isoformat()
         
-        # Query movies with future showtimes using a join
         # This gets distinct movies that have at least one future showtime
         response = supabase.rpc(
             'get_movies_with_active_showtimes',
-            {'current_time': now}
+            {'query_time': now}
         ).execute()
         
         # If RPC doesn't exist, fall back to manual filtering

@@ -1,9 +1,9 @@
 'use client';
-
 import Link from 'next/link';
 import { Calendar, Clock, MapPin, Search, Ticket, ArrowRight, Clapperboard, Star } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import UserMenu from './UserMenu';
 
 interface Movie {
     id: string;
@@ -97,12 +97,10 @@ export default function HomeClient({ movies }: HomeClientProps) {
                                 <Ticket className="w-4 h-4" />
                                 Offers
                             </Link>
-                            <Link
-                                href="/admin"
-                                className="px-6 py-2.5 text-sm font-bold text-[#020617] bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-xl hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all transform hover:-translate-y-0.5"
-                            >
-                                Admin Access
+                            <Link href="/admin" className="hidden lg:block text-sm font-medium text-gray-300 hover:text-yellow-400 transition-colors">
+                                Admin
                             </Link>
+                            <UserMenu />
                         </div>
                     </div>
                 </div>
