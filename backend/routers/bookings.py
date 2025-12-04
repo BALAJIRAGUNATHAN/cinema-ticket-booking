@@ -1,6 +1,7 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from database import supabase
 from models import BookingCreate
+from auth_middleware import get_current_user_optional
 import stripe
 import os
 from dotenv import load_dotenv
@@ -90,14 +91,25 @@ async def create_payment_intent(booking: BookingCreate):
 
 from fastapi import BackgroundTasks
 
-@router.post("/confirm")
-async def confirm_booking(booking_details: BookingCreate, background_tasks: BackgroundTasks):
+@router.post("/confirm-booking")
+async def confirm_booking(
+    booking_details: BookingConfirmation,
+    background_tasks: BackgroundTasks,
+    current_user: dict = Depends(get_current_user_optional)
+):
     try:
         print(f"Confirming booking for {booking_details.customer_email}")
         
-        # Create booking in Supabase
+        # Convert booking details to dict
         booking_data = booking_details.dict()
         booking_data['payment_status'] = 'paid'
+        
+        # Add user_id if user is authenticated
+        if current_user:
+            booking_data['user_id'] = current_user['id']
+            print(f"✅ Linking booking to user: {current_user['id']}")
+        else:
+            print("ℹ️ Guest booking (no user_id)")
         
         response = supabase.table("bookings").insert(booking_data).execute()
         if not response.data:
