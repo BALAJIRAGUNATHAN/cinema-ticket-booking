@@ -11,23 +11,20 @@ class MovieBase(BaseModel):
     duration: Optional[int] = None
     release_date: Optional[str] = None
     rating: Optional[float] = None # Rating out of 10
+    backdrop_url: Optional[str] = None
     trailer_url: Optional[str] = None
-    languages: List[str] = ["English"]  # Available languages for the movie
-    cast: List[Dict[str, Any]] = [] # Max 4 cast members: [{"name": "...", "role": "...", "image": "..."}]
+    languages: Optional[List[str]] = None
 
 class MovieCreate(MovieBase):
     pass
-class Movie(MovieBase):
-    id: str
-    created_at: datetime
 
 class ShowtimeBase(BaseModel):
     movie_id: str
     screen_id: str
     start_time: str
-    price: int  # in cents
-    language: str = "English"  # Language of the screening
-    format: str = "2D"  # Screening format: 2D, 3D, IMAX, 4DX, etc.
+    end_time: str
+    price: int
+
 class ShowtimeCreate(ShowtimeBase):
     pass
 
@@ -40,3 +37,7 @@ class BookingCreate(BaseModel):
     total_amount: int
     coupon_code: Optional[str] = None
     discount_amount: Optional[int] = 0
+
+class BookingConfirmation(BookingCreate):
+    """Model for confirming a booking after payment"""
+    payment_intent_id: str
