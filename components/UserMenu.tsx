@@ -3,9 +3,9 @@
 import { useAuth } from '@/contexts/AuthContext'
 import Link from 'next/link'
 import { User, LogOut, Ticket, ChevronDown } from 'lucide-react'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, memo } from 'react'
 
-export default function UserMenu() {
+const UserMenu = memo(function UserMenu() {
     const { user, signOut } = useAuth()
     const [isOpen, setIsOpen] = useState(false)
     const menuRef = useRef<HTMLDivElement>(null)
@@ -97,4 +97,6 @@ export default function UserMenu() {
             )}
         </div>
     )
-}
+})
+
+export default UserMenu;

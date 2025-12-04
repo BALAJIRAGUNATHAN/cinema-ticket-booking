@@ -6,7 +6,7 @@ async function getMovies() {
   try {
     console.log('Fetching movies with showtimes from:', API_URL);
     const res = await fetch(`${API_URL}/movies/with-showtimes`, {
-      cache: 'no-store',
+      next: { revalidate: 300 }, // Cache for 5 minutes
       headers: {
         'Content-Type': 'application/json',
       },
@@ -26,11 +26,36 @@ async function getMovies() {
   }
 }
 
+async function getAds() {
+  try {
+    const res = await fetch(`${API_URL}/ads`, {
+      next: { revalidate: 1800 }, // Cache for 30 minutes
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!res.ok) {
+      return [];
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error('Error fetching ads:', error);
+    return [];
+  }
+}
+
 export default async function Home() {
   console.log("--------------------------------------------------");
   console.log("SERVER SIDE LOG: LUMIERE PREMIUM UI IS RUNNING");
   console.log("--------------------------------------------------");
-  const movies = await getMovies();
 
-  return <HomeClient movies={movies} />;
+  // Fetch both in parallel for faster loading
+  const [movies, ads] = await Promise.all([
+    getMovies(),
+    getAds()
+  ]);
+
+  return <HomeClient movies={movies} ads={ads} />;
 }

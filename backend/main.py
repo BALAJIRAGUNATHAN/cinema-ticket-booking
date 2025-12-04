@@ -6,10 +6,14 @@ import os
 from rate_limiter import limiter
 from slowapi.errors import RateLimitExceeded
 from slowapi import _rate_limit_exceeded_handler
+from fastapi.responses import JSONResponse
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from rate_limiter import limiter, rate_limit_strict
 
 load_dotenv()
 
-app = FastAPI(title="Movie Booking System API")
+app = FastAPI(title="Movie Booking API")
 
 # Add rate limiter to app
 app.state.limiter = limiter
@@ -21,7 +25,7 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 # Get frontend URL from environment
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
-# CORS configuration
+# Configure CORS - Allow both local and production frontends
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[FRONTEND_URL] if os.getenv("ENVIRONMENT") == "production" else ["*"],

@@ -1,9 +1,14 @@
 'use client';
 import Link from 'next/link';
 import { Calendar, Clock, MapPin, Search, Ticket, ArrowRight, Clapperboard, Star } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import Image from 'next/image';
-import UserMenu from './UserMenu';
+import dynamic from 'next/dynamic';
+
+// Lazy load UserMenu for better initial load performance
+const UserMenu = dynamic(() => import('./UserMenu'), {
+    loading: () => <div className="w-10 h-10 bg-white/5 rounded-full animate-pulse" />
+});
 
 interface Movie {
     id: string;
@@ -26,17 +31,13 @@ interface Advertisement {
 
 interface HomeClientProps {
     movies: Movie[];
+    ads: Advertisement[];
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-export default function HomeClient({ movies }: HomeClientProps) {
-    const [ads, setAds] = useState<Advertisement[]>([]);
+function HomeClient({ movies, ads }: HomeClientProps) {
     const [currentAdIndex, setCurrentAdIndex] = useState(0);
-
-    useEffect(() => {
-        fetchAds();
-    }, []);
 
     // Auto-rotate ads every 4 seconds
     useEffect(() => {
@@ -47,16 +48,6 @@ export default function HomeClient({ movies }: HomeClientProps) {
             return () => clearInterval(timer);
         }
     }, [ads.length]);
-
-    const fetchAds = async () => {
-        try {
-            const res = await fetch(`${API_URL}/ads`);
-            const data = await res.json();
-            setAds(data);
-        } catch (error) {
-            console.error('Error fetching ads:', error);
-        }
-    };
 
     return (
         <div className="min-h-screen bg-[#020617] text-white selection:bg-yellow-500/30">
@@ -261,3 +252,7 @@ export default function HomeClient({ movies }: HomeClientProps) {
         </div>
     );
 }
+
+// Export memoized version to prevent unnecessary re-renders
+export default memo(HomeClient);
+
