@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
+    // Admin authentication disabled - direct access allowed
+    // Uncomment below to re-enable password protection
+
+    /*
     // Only protect /admin routes
     if (request.nextUrl.pathname.startsWith('/admin')) {
 
@@ -19,6 +23,7 @@ export function middleware(request: NextRequest) {
             return NextResponse.redirect(loginUrl);
         }
     }
+    */
 
     return NextResponse.next();
 }
