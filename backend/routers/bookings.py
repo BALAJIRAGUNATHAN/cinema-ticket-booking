@@ -104,6 +104,10 @@ async def confirm_booking(
         booking_data = booking_details.dict()
         booking_data['payment_status'] = 'paid'
         
+        # Rename payment_intent_id to stripe_payment_intent_id to match database schema
+        if 'payment_intent_id' in booking_data:
+            booking_data['stripe_payment_intent_id'] = booking_data.pop('payment_intent_id')
+        
         # Add user_id if user is authenticated
         if current_user:
             booking_data['user_id'] = current_user['id']
