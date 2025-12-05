@@ -9,9 +9,9 @@ export async function POST(request: Request) {
         if (password === '12345') {
             const response = NextResponse.json({ success: true });
 
-            // Set httpOnly cookie for better security
+            // Set cookie (not httpOnly to allow client-side navigation)
+            // sameSite: strict provides CSRF protection
             response.cookies.set('admin_auth', 'true', {
-                httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
                 maxAge: 86400, // 24 hours
