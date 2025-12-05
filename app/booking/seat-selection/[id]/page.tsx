@@ -307,7 +307,8 @@ export default function BookingPage({ params }: { params: Promise<{ id: string }
                     seats: selectedSeats,
                     total_amount: finalTotal,
                     coupon_code: appliedCoupon ? appliedCoupon.coupon_code : null,
-                    discount_amount: discountAmount
+                    discount_amount: discountAmount,
+                    payment_intent_id: paymentIntentId
                 })
             });
 
