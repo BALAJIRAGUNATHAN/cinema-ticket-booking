@@ -1,10 +1,7 @@
 import os
-import io
-import base64
 from dotenv import load_dotenv
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail, Email, To, Content
-import qrcode
 
 load_dotenv()
 
@@ -12,32 +9,6 @@ load_dotenv()
 SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY", "").strip()
 SENDGRID_FROM_EMAIL = os.environ.get("SENDGRID_FROM_EMAIL", "noreply@yourdomain.com").strip()
 SENDGRID_FROM_NAME = os.environ.get("SENDGRID_FROM_NAME", "CineSpot").strip()
-FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000").strip()
-
-def generate_qr_code(booking_id: str) -> str:
-    """Generate QR code as base64 string for email embedding"""
-    # Create verification URL
-    verify_url = f"{FRONTEND_URL}/verify-ticket/{booking_id}"
-    
-    # Generate QR code
-    qr = qrcode.QRCode(
-        version=1,
-        error_correction=qrcode.constants.ERROR_CORRECT_L,
-        box_size=10,
-        border=2,
-    )
-    qr.add_data(verify_url)
-    qr.make(fit=True)
-    
-    # Create image
-    img = qr.make_image(fill_color="black", back_color="white")
-    
-    # Convert to base64
-    buffer = io.BytesIO()
-    img.save(buffer, format='PNG')
-    img_str = base64.b64encode(buffer.getvalue()).decode()
-    
-    return f"data:image/png;base64,{img_str}"
 
 def send_booking_confirmation(
     customer_email: str,
@@ -140,22 +111,10 @@ def send_booking_confirmation(
                                         </tr>
                                     </table>
 
-                                    <!-- QR Code Section -->
-                                    <div style="text-align: center; margin-bottom: 30px;">
-                                        <p style="margin: 0 0 16px 0; color: #94a3b8; font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;">Scan to Verify Ticket</p>
-                                        <div style="display: inline-block; padding: 16px; background: white; border-radius: 12px; border: 3px solid #3b82f6; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);">
-                                            <img src="{generate_qr_code(booking_id)}" alt="Ticket QR Code" style="width: 200px; height: 200px; display: block;" />
-                                        </div>
-                                        <p style="margin: 16px 0 0 0; color: #64748b; font-size: 13px; line-height: 1.5;">
-                                            Show this QR code at the theater entrance<br/>
-                                            <span style="color: #94a3b8; font-size: 11px;">Or use Booking ID: {booking_id.split('-')[0].upper()}</span>
-                                        </p>
-                                    </div>
-
                                     <!-- Important Notice -->
                                     <div style="background-color: rgba(59, 130, 246, 0.1); border-left: 4px solid #3b82f6; padding: 16px; border-radius: 8px; margin-bottom: 30px;">
                                         <p style="margin: 0; color: #e2e8f0; font-size: 14px; line-height: 1.6;">
-                                            <strong style="color: #ffffff;">📱 Important:</strong> Please show this QR code or booking ID at the theater entrance. Arrive 15 minutes before showtime.
+                                            <strong style="color: #ffffff;">📱 Important:</strong> Please show this email or your booking ID at the theater entrance. Arrive 15 minutes before showtime.
                                         </p>
                                     </div>
 
@@ -176,30 +135,30 @@ def send_booking_confirmation(
         
         # Plain text version for email clients that don't support HTML
         plain_text_content = f"""
-🎬 BOOKING CONFIRMED!
-
-Hi {customer_name},
-
-Your movie ticket booking has been confirmed!
-
-BOOKING DETAILS:
-================
-Movie: {movie_title}
-Theater: {theater_name}
-Screen: {screen_name}
-Date & Time: {showtime}
-Seats: {', '.join(seats)}
-
-Booking ID: {booking_id.split('-')[0].upper()}
-Total Paid: ₹{(total_amount / 100):.2f}
-
-IMPORTANT:
-Please show this email or your booking ID at the theater entrance.
-Arrive 15 minutes before showtime.
-
-Need help? Contact our support team.
-
-© 2024 CineSpot - Cinema Booking System
+        🎬 BOOKING CONFIRMED!
+        
+        Hi {customer_name},
+        
+        Your movie ticket booking has been confirmed!
+        
+        BOOKING DETAILS:
+        ================
+        Movie: {movie_title}
+        Theater: {theater_name}
+        Screen: {screen_name}
+        Date & Time: {showtime}
+        Seats: {', '.join(seats)}
+        
+        Booking ID: {booking_id.split('-')[0].upper()}
+        Total Paid: ₹{(total_amount / 100):.2f}
+        
+        IMPORTANT:
+        Please show this email or your booking ID at the theater entrance.
+        Arrive 15 minutes before showtime.
+        
+        Need help? Contact our support team.
+        
+        © 2024 CineSpot - Cinema Booking System
         """
         
         print(f"📤 Sending email via SendGrid API...")
@@ -240,3 +199,20 @@ Need help? Contact our support team.
             print("⚠️ SendGrid Sender Error: You may need to verify your sender email address")
         
         return False
+
+
+def send_test_email(test_email: str):
+    """Send a test email to verify SendGrid configuration"""
+    print(f"🧪 Sending test email to {test_email}")
+    
+    return send_booking_confirmation(
+        customer_email=test_email,
+        customer_name="Test User",
+        movie_title="The Matrix Resurrections",
+        theater_name="Grand Cinema Complex",
+        screen_name="Screen 1 - IMAX",
+        showtime="December 25, 2024 at 07:30 PM",
+        seats=["A1", "A2", "A3"],
+        total_amount=150000,  # ₹1500.00
+        booking_id="test-booking-12345"
+    )
