@@ -296,7 +296,7 @@ export default function BookingPage({ params }: { params: Promise<{ id: string }
             const originalTotal = showtime.price * selectedSeats.length;
             const finalTotal = Math.max(0, originalTotal - discountAmount);
 
-            const response = await fetch(`${API_URL}/bookings/confirm`, {
+            const response = await fetch(`${API_URL}/bookings/confirm-booking`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
