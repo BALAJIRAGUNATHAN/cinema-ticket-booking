@@ -146,12 +146,12 @@ async def confirm_booking(
             
             # Check email credentials before adding background task
             import os
-            resend_api_key = os.environ.get("RESEND_API_KEY", "").strip()
+            sendgrid_api_key = os.environ.get("SENDGRID_API_KEY", "").strip()
             
-            if not resend_api_key:
-                print(f"⚠️ WARNING: RESEND_API_KEY not configured. Email will not be sent.")
+            if not sendgrid_api_key:
+                print(f"⚠️ WARNING: SENDGRID_API_KEY not configured. Email will not be sent.")
             else:
-                print(f"✅ Email credentials configured (Resend)")
+                print(f"✅ Email credentials configured (SendGrid)")
             
             # Send email confirmation in background
             from email_service import send_booking_confirmation
