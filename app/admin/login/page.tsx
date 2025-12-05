@@ -15,14 +15,25 @@ export default function AdminLogin() {
         setLoading(true);
         setError('');
 
-        // Simple client-side check (as requested)
-        // In a real app, this should be a server action or API call
-        if (password === '12345') {
-            // Set cookie
-            document.cookie = "admin_auth=true; path=/; max-age=86400; SameSite=Strict";
-            router.push('/admin');
-        } else {
-            setError('Invalid password');
+        try {
+            const res = await fetch('/api/admin/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password })
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                // Cookie is set by the API, now navigate
+                router.push('/admin');
+                router.refresh(); // Force refresh to pick up cookie
+            } else {
+                setError(data.error || 'Invalid password');
+                setLoading(false);
+            }
+        } catch (error) {
+            setError('Connection error. Please try again.');
             setLoading(false);
         }
     };

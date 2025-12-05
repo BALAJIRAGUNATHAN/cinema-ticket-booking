@@ -202,6 +202,35 @@ export default function BookingPage({ params }: { params: Promise<{ id: string }
     };
 
     const handleContinueToDetails = () => {
+        // Validate advance booking time restrictions
+        if (!showtime || !showtime.start_time) {
+            alert('Unable to verify showtime. Please try again.');
+            return;
+        }
+
+        const showtimeDate = new Date(showtime.start_time);
+        const now = new Date();
+        const minutesUntilShowtime = (showtimeDate.getTime() - now.getTime()) / (1000 * 60);
+        const daysUntilShowtime = minutesUntilShowtime / (60 * 24);
+
+        // Check if showtime has already passed
+        if (minutesUntilShowtime < 0) {
+            alert('⏰ This showtime has already started. Please select a different showtime.');
+            return;
+        }
+
+        // Minimum advance booking: 30 minutes
+        if (minutesUntilShowtime < 30) {
+            alert('⏰ Bookings must be made at least 30 minutes before showtime. Please select a later showtime.');
+            return;
+        }
+
+        // Maximum advance booking: 30 days
+        if (daysUntilShowtime > 30) {
+            alert('📅 Bookings can only be made up to 30 days in advance. Please select a closer showtime.');
+            return;
+        }
+
         setStep('details');
     };
 
